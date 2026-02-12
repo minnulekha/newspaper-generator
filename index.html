@@ -282,7 +282,11 @@
             body { flex-direction: column; overflow: auto; height: auto; }
             .sidebar { width: 100%; height: auto; }
             .workspace { padding: 20px; overflow: hidden; }
-            .paper { transform-origin: top center; transform: scale(0.65); margin-bottom: -400px; }
+            .paper { 
+        transform-origin: top left; /* Changed from top center */
+        left: 50%;
+        transform: scale(0.6) translateX(-50%); 
+    }
         }
     </style>
 </head>
@@ -703,39 +707,53 @@ Ate too much sushi</textarea>
     const btn = document.querySelector('.btn-dl');
     const oldText = btn.innerHTML;
     
-    // 1. Store the original transform style
+    // 1. Force the page to the top so scroll doesn't offset the capture
+    window.scrollTo(0, 0);
+
+    // 2. Store original styles
     const originalTransform = paper.style.transform;
-    
-    // 2. Remove the scale/transform temporarily so html2canvas sees 
-    // the "full size" version. This fixes the mobile shadow/ghosting.
+    const originalMargin = paper.style.margin;
+
+    // 3. Reset transform so html2canvas sees the true 800px width
     paper.style.transform = 'none';
+    paper.style.margin = '0';
+    
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rendering...';
 
-    // Small timeout to ensure the browser has cleared the transform
     setTimeout(() => {
         html2canvas(paper, {
-            scale: 2, // Keeps high resolution
+            scale: 2, // High resolution
             useCORS: true,
-            backgroundColor: null,
-            logging: false,
-            // Ensure we capture from the top of the element
-            scrollY: -window.scrollY, 
-            scrollX: -window.scrollX
+            allowTaint: true,
+            backgroundColor: "#ffffff", // Avoid transparency issues on some mobile galleries
+            width: 800,
+            height: paper.scrollHeight,
+            windowWidth: 800 // Forces the 'window' width for the canvas
         }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'My-Newspaper.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-
-            // 3. Restore the original transform (the mobile view)
-            paper.style.transform = originalTransform;
-            btn.innerHTML = oldText;
+            // Convert to Blob instead of DataURL for better mobile support
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = 'Valentine-Post.png';
+                link.href = url;
+                
+                // Append to body to ensure trigger works on all mobile browsers
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Cleanup
+                URL.revokeObjectURL(url);
+                paper.style.transform = originalTransform;
+                paper.style.margin = originalMargin;
+                btn.innerHTML = oldText;
+            }, 'image/png');
         }).catch(err => {
             console.error("Capture failed", err);
             paper.style.transform = originalTransform;
             btn.innerHTML = oldText;
         });
-    }, 100); 
+    }, 200); 
 }
     </script>
 </body>
