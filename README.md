@@ -4,7 +4,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-View_Project-2ea44f?style=for-the-badge&logo=github)](https://minnulekha.github.io/newspaper-generator/index.html)
 
-![Project Preview]<img width="1356" height="594" alt="image" src="https://github.com/user-attachments/assets/74874371-38d7-43a4-bbd4-e6288829a962" />
+Project Preview<img width="1356" height="594" alt="image" src="https://github.com/user-attachments/assets/74874371-38d7-43a4-bbd4-e6288829a962" />
 
 )
 
