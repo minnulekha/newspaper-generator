@@ -8,16 +8,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Oswald:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Great+Vibes&family=Cinzel:wght@700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Courier+Prime&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Oswald:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Great+Vibes&family=Cinzel:wght@700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Courier+Prime&family=Permanent+Marker&family=Black+Ops+One&display=swap" rel="stylesheet">
 
     <style>
         :root {
             /* UI Theme */
-            --ui-bg: #1a1a1d;
-            --ui-sidebar: #25252b;
-            --ui-border: #3a3a40;
-            --ui-text: #e0e0e0;
-            --ui-accent: #c3073f;
+            --ui-bg: #121212;
+            --ui-sidebar: #1e1e24;
+            --ui-border: #333;
+            --ui-text: #f0f0f0;
+            --ui-accent: #ff4757;
+            --ui-accent-hover: #ff6b81;
+            --ui-input-bg: #2b2b36;
             
             /* Paper Dynamic Vars */
             --ink: #1a1a1a;
@@ -44,24 +46,25 @@
             display: flex;
             flex-direction: column;
             z-index: 20;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.4);
+            box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+            transition: width 0.3s ease;
         }
 
         .brand {
             padding: 20px;
             text-align: center;
-            background: #151518;
+            background: #18181d;
             border-bottom: 1px solid var(--ui-border);
         }
         .brand h1 { margin: 0; font-family: 'Cinzel', serif; color: white; letter-spacing: 2px; font-size: 1.4rem; }
-        .brand span { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+        .brand span { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
 
         /* Template Switcher */
         .template-nav {
             display: flex;
-            padding: 10px;
-            gap: 5px;
-            background: #1f1f23;
+            padding: 15px;
+            gap: 10px;
+            background: #18181d;
             border-bottom: 1px solid var(--ui-border);
         }
         .t-btn {
@@ -69,87 +72,175 @@
             background: transparent;
             border: 1px solid #444;
             color: #aaa;
-            padding: 8px;
-            border-radius: 4px;
+            padding: 10px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 0.75rem;
             font-weight: bold;
-            transition: 0.2s;
+            transition: all 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
         }
-        .t-btn:hover { background: #333; color: white; }
-        .t-btn.active { background: var(--ui-accent); border-color: var(--ui-accent); color: white; }
+        .t-btn:hover { background: #333; color: white; border-color: #666; }
+        .t-btn.active { background: var(--ui-accent); border-color: var(--ui-accent); color: white; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); }
 
         /* Scrollable Controls */
         .controls {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
+            padding: 20px;
         }
+        
+        /* Custom Scrollbar */
+        .controls::-webkit-scrollbar { width: 6px; }
+        .controls::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
 
         /* Accordion Groups */
         .group {
-            margin-bottom: 15px;
-            background: #2c2c33;
+            margin-bottom: 20px;
+            background: var(--ui-input-bg);
             border: 1px solid var(--ui-border);
-            border-radius: 6px;
+            border-radius: 8px;
             overflow: hidden;
         }
         .group-head {
             padding: 12px 15px;
-            background: #34343d;
+            background: #32323d;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
             display: flex;
             justify-content: space-between;
             align-items: center;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            color: #ccc;
+            transition: background 0.2s;
         }
-        .group-head:hover { background: #3e3e48; }
+        .group-head:hover { background: #3e3e48; color: white; }
         .group-body { padding: 15px; display: block; border-top: 1px solid var(--ui-border); }
         .group.closed .group-body { display: none; }
-        .group.closed .group-head i { transform: rotate(-90deg); }
+        .group.closed .group-head i { transform: rotate(-90deg); transition: transform 0.2s; }
 
         /* Inputs */
-        .field { margin-bottom: 12px; }
-        .field label { display: block; font-size: 0.75rem; color: #999; margin-bottom: 5px; }
+        .field { margin-bottom: 15px; }
+        .field label { display: block; font-size: 0.75rem; color: #aaa; margin-bottom: 6px; font-weight: 600; }
         input[type="text"], textarea, select {
             width: 100%; padding: 10px; background: #1a1a1d; border: 1px solid #444; 
             color: white; border-radius: 4px; font-family: inherit; font-size: 0.9rem;
+            transition: border-color 0.2s;
         }
-        input:focus, textarea:focus { border-color: var(--ui-accent); }
+        input:focus, textarea:focus, select:focus { border-color: var(--ui-accent); }
         textarea { min-height: 70px; resize: vertical; }
-
-        /* Color & Range */
-        .color-row { display: flex; gap: 10px; }
-        .color-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
-        .color-dot.active { border-color: white; transform: scale(1.1); }
         
-        .sticker-row { display: flex; gap: 10px; flex-wrap: wrap; }
-        .sticker-btn {
-            background: #444; color: white; border: none; padding: 5px 10px; 
-            border-radius: 20px; font-size: 0.7rem; cursor: pointer;
+        input[type="range"] {
+            width: 100%; -webkit-appearance: none; background: transparent; margin: 10px 0;
         }
-        .sticker-btn:hover { background: var(--ui-accent); }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: var(--ui-accent); cursor: pointer; margin-top: -6px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 2px;
+        }
+
+        /* Color Picker */
+        .color-row { display: flex; gap: 10px; }
+        .color-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+        .color-dot:hover { transform: scale(1.1); }
+        .color-dot.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        
+        /* ---------------------------------------------------------
+           UPDATED: PREMIUM PHOTO STUDIO PANEL
+           --------------------------------------------------------- */
+        #img-adv-controls {
+            background: linear-gradient(160deg, #25252b 0%, #1a1a1f 100%);
+            padding: 0;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+            display: none;
+            overflow: hidden;
+            animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        /* Glow Effect */
+        #img-adv-controls::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--ui-accent), #ff9f43);
+        }
+
+        @keyframes slideIn { from { opacity:0; transform: translateY(-10px) scale(0.95); } to { opacity:1; transform: translateY(0) scale(1); } }
+
+        .img-panel-header {
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .img-panel-header span {
+            color: var(--ui-accent); font-weight: 800; font-size: 0.75rem; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px;
+        }
+        .img-panel-close { color: #666; cursor: pointer; transition: 0.2s; padding: 5px; }
+        .img-panel-close:hover { color: white; transform: rotate(90deg); }
+
+        .img-panel-body { padding: 20px; }
+
+        .control-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .control-val { font-family: 'Courier Prime', monospace; font-size: 0.7rem; color: var(--ui-accent); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; }
+
+        .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .tool-btn {
+            background: linear-gradient(to bottom, #3a3a45, #2b2b36); 
+            color: #ddd; border: 1px solid #444; padding: 12px;
+            border-radius: 8px; cursor: pointer; font-size: 0.75rem; display: flex;
+            align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;
+            font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .tool-btn:hover { background: linear-gradient(to bottom, #444, #333); border-color: #777; color: white; transform: translateY(-1px); }
+        .tool-btn:active { transform: translateY(1px); }
+        
+        .tool-btn.danger { color: #ff6b6b; border-color: rgba(255,107,107,0.3); background: rgba(45, 10, 10, 0.5); }
+        .tool-btn.danger:hover { background: rgba(255,107,107,0.2); border-color: #ff6b6b; }
+
+        .drag-hint {
+            font-size: 0.65rem; color: #888; margin-top: 15px; text-align: center; 
+            background: rgba(0,0,0,0.2); padding: 8px; border-radius: 20px; border: 1px dashed #444;
+        }
+
+        /* Sticker Controls */
+        .sticker-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+        .sticker-btn {
+            background: #333; color: #ccc; border: 1px solid #444; padding: 8px 12px; 
+            border-radius: 6px; font-size: 0.7rem; cursor: pointer; flex: 1 0 30%;
+            transition: 0.2s; font-weight: 600;
+        }
+        .sticker-btn:hover { background: var(--ui-accent); color: white; border-color: var(--ui-accent); }
+        
+        .sticker-editor {
+            background: #25252b; padding: 10px; border-radius: 6px; border: 1px dashed #555;
+            display: none; margin-top: 10px;
+        }
+        .sticker-editor.active { display: block; }
 
         /* Action Bar */
         .actions {
             padding: 20px;
-            background: #151518;
+            background: #18181d;
             border-top: 1px solid var(--ui-border);
         }
         .btn-dl {
-            width: 100%; padding: 15px; background: #27ae60; color: white; font-weight: bold;
-            border: none; border-radius: 6px; cursor: pointer; display: flex; 
+            width: 100%; padding: 16px; background: #27ae60; color: white; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; display: flex; 
             justify-content: center; align-items: center; gap: 10px; font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); transition: 0.3s;
         }
-        .btn-dl:hover { background: #219150; }
+        .btn-dl:hover { background: #219150; transform: translateY(-2px); }
 
-        /* --- PREVIEW AREA --- */
+        /* --- WORKSPACE --- */
         .workspace {
             flex: 1;
-            background: #555;
+            background: #333;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -159,135 +250,146 @@
         }
 
         .paper {
-            width: 800px;
-            min-height: 1150px; /* A4ish ratio */
-            background: var(--paper-bg);
-            color: var(--ink);
-            padding: 40px;
-            position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            transition: transform 0.3s;
-            overflow: hidden; /* Clips dragged stickers */
-        }
+    width: 800px;
+    /* CRITICAL FIX: FORCE WIDTH TO PREVENT TEXT SQUISHING */
+    min-width: 800px; 
+    max-width: 800px;
+    flex-shrink: 0; 
+    
+    min-height: 1150px;
+    background: var(--paper-bg);
+    color: var(--ink);
+    padding: 40px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+    transform-origin: top center; 
+    overflow: hidden;
+}
 
-        /* VINTAGE MODE */
+        /* Vintage Texture */
         .paper.vintage {
             background-color: #f3e5c9;
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
         }
-        .paper.vintage .photo-box { filter: sepia(0.4) contrast(1.1); }
 
-        /* --- DRAGGABLE ELEMENTS --- */
+        /* --- DRAGGABLE STICKERS --- */
         .draggable {
-            position: absolute;
-            cursor: grab;
-            z-index: 100;
-            user-select: none;
+            position: absolute; cursor: grab; z-index: 100; user-select: none;
+            transition: transform 0.1s;
         }
         .draggable:active { cursor: grabbing; }
+        .draggable.selected { outline: 2px dashed var(--ui-accent); outline-offset: 5px; }
 
         .st-stamp {
-            width: 120px; height: 120px;
-            border: 4px double #c0392b; border-radius: 50%;
-            color: #c0392b; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            font-family: 'Stencil', sans-serif; font-weight: bold;
-            opacity: 0.8; mix-blend-mode: multiply; transform: rotate(-15deg);
-            background: rgba(255,255,255,0.1);
+            width: 120px; height: 120px; border: 4px double #c0392b; border-radius: 50%;
+            color: #c0392b; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-family: 'Black Ops One', cursive; font-weight: bold;
+            opacity: 0.9; mix-blend-mode: multiply; transform: rotate(-15deg);
+            background: rgba(255,255,255,0.1); text-align: center; line-height: 1;
         }
+        .st-stamp span { font-size: 2rem; }
         .st-tape {
-            width: 140px; height: 35px;
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(0,0,0,0.1);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            transform: rotate(3deg);
+            width: 140px; height: 35px; background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-        .st-coffee {
-            width: 150px; height: 150px;
-            border: 15px solid #5a3e2b;
-            border-radius: 50%;
-            opacity: 0.15;
-            filter: blur(2px);
-            pointer-events: none; /* Let clicks pass through coffee */
+        .st-fragile {
+            border: 3px solid #c0392b; color: #c0392b; padding: 5px 15px;
+            font-family: 'Black Ops One', cursive; font-size: 1.5rem; text-transform: uppercase;
+            mix-blend-mode: multiply; opacity: 0.8; letter-spacing: 2px;
+        }
+        .st-xoxo {
+            font-family: 'Permanent Marker', cursive; color: #c0392b; font-size: 3rem; transform: rotate(-10deg);
         }
 
-        /* --- GLOBAL TYPOGRAPHY --- */
-        .photo-box { background: #ddd; overflow: hidden; position: relative; transition: 0.3s; }
-        .photo-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        /* --- IMAGE CONTAINERS --- */
+        .photo-box { 
+            background-color: #e0e0e0; 
+            width: 100%; 
+            position: relative; 
+            overflow: hidden;
+            cursor: grab;
+            transition: box-shadow 0.2s;
+        }
+        .photo-box:active { cursor: grabbing; }
+        /* Enhanced Selection State */
+        .photo-box.img-selected { 
+            outline: 3px solid var(--ui-accent); 
+            outline-offset: 2px;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.4);
+            z-index: 10;
+        }
         
-        .f-bw { filter: grayscale(100%) contrast(1.15); }
-        .f-sepia { filter: sepia(0.8) contrast(0.9); }
-        .f-color { filter: none; }
+        .photo-box img {
+            width: 100%; height: 100%; 
+            object-fit: cover; 
+            display: block;
+            pointer-events: none;
+            transform-origin: center center;
+            will-change: transform; /* Performance optimization */
+        }
 
-        /* =========================================
-           TEMPLATE 1: CLASSIC (Cupids Post)
-           ========================================= */
+        .caption { font-family: 'Merriweather', serif; font-size: 0.75rem; font-style: italic; margin-top: 5px; text-align: center; color: #555; }
+
+        /* --- RESPONSIVE CSS --- */
+        @media (max-width: 1100px) {
+            body { flex-direction: column; overflow: auto; height: auto; }
+            .sidebar { width: 100%; height: auto; order: 2; }
+            .workspace { padding: 20px; overflow: hidden; order: 1; min-height: 60vh; }
+            .paper {
+            width: 800px;
+            /* CRITICAL MOBILE FIX: PREVENT SQUISHING */
+            flex-shrink: 0; 
+            min-height: 1150px;
+            background: var(--paper-bg);
+            color: var(--ink);
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+            transform-origin: top center; /* Scales from top down */
+            overflow: hidden;
+        }
+        }
+
+        /* ==================== TEMPLATES ==================== */
         #tpl-classic { display: none; }
         .classic-head { text-align: center; border-bottom: 4px double var(--ink); padding-bottom: 10px; margin-bottom: 20px; }
         .classic-title { font-family: 'UnifrakturMaguntia'; font-size: 5.5rem; line-height: 0.9; margin: 0; }
         .classic-meta { display: flex; justify-content: space-between; border-bottom: 1px solid var(--ink); padding: 5px 0; font-family: 'Merriweather'; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 20px; }
-        
         .classic-hero { text-align: center; margin-bottom: 30px; }
         .c-hl-1 { font-family: 'Oswald'; font-size: 5rem; text-transform: uppercase; line-height: 0.9; }
         .c-hl-2 { font-family: 'Great Vibes'; font-size: 4.5rem; display: block; margin-top: -20px; font-weight: 400; }
-        
         .classic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .c-art-title { font-family: 'Oswald'; border-bottom: 1px solid var(--ink); margin: 0 0 10px 0; font-size: 1.2rem; }
-        .c-body { font-family: 'Merriweather'; font-size: 0.9rem; line-height: 1.6; text-align: justify; }
+        .c-left-title, .c-right-title { font-family: 'Oswald'; border-bottom: 1px solid var(--ink); margin: 15px 0 10px 0; font-size: 1.2rem; text-transform: uppercase; }
+        .c-left-text, .c-right-text { font-family: 'Merriweather'; font-size: 0.9rem; line-height: 1.6; text-align: justify; }
 
-        /* =========================================
-           TEMPLATE 2: WRAPPED (365 Days)
-           ========================================= */
         #tpl-wrapped { display: none; }
         .wrapped-head { text-align: center; border-bottom: 2px solid var(--ink); padding-bottom: 5px; margin-bottom: 5px; }
         .wrapped-title { font-family: 'UnifrakturMaguntia'; font-size: 4.8rem; margin: 0; }
         .wrapped-meta { display: flex; justify-content: space-between; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 3px 0; font-family: 'Merriweather'; font-size: 0.65rem; text-transform: uppercase; margin-bottom: 20px; }
-        
         .wrapped-grid { display: grid; grid-template-columns: 160px 1fr 160px; gap: 20px; }
-        
-        /* Side Cols */
         .w-col-side { font-family: 'Merriweather'; font-size: 0.75rem; text-align: justify; line-height: 1.4; }
         .w-col-side h4 { font-family: 'Oswald'; font-size: 1.2rem; margin: 0 0 5px 0; border-bottom: 1px solid var(--ink); }
-        
-        /* Center */
         .w-center { text-align: center; }
         .w-break { border-top: 3px double var(--ink); border-bottom: 3px double var(--ink); padding: 10px 0; margin: 15px 0; }
         .w-break h2 { font-family: 'Playfair Display'; font-size: 2.2rem; margin: 0; line-height: 1; text-transform: uppercase; }
         .w-break p { font-family: 'Great Vibes'; font-size: 1.8rem; margin: 5px 0 0 0; }
-        
         .w-list { text-align: left; background: rgba(0,0,0,0.03); padding: 15px; border: 1px solid rgba(0,0,0,0.1); }
         .w-list h5 { font-family: 'Oswald'; margin: 0 0 10px 0; font-size: 0.9rem; }
         .w-list ul { margin: 0; padding-left: 20px; font-family: 'Merriweather'; font-size: 0.85rem; }
-        .w-list li { margin-bottom: 5px; }
-
         .w-footer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--ink); }
-        .w-foot-item h5 { font-family: 'Oswald'; margin: 0; font-size: 0.8rem; color: #666; }
+        .w-foot-item h5 { font-family: 'Oswald'; margin: 0; font-size: 0.8rem; color: #666; text-transform: uppercase; }
         .w-foot-item p { font-family: 'Merriweather'; margin: 0; font-size: 0.7rem; }
 
-        /* =========================================
-           TEMPLATE 3: GALLERY (Snapshot)
-           ========================================= */
         #tpl-gallery { display: none; }
         .gal-head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid var(--ink); padding-bottom: 10px; margin-bottom: 25px; }
         .gal-title { font-family: 'Playfair Display'; font-size: 4rem; margin: 0; font-weight: 900; line-height: 0.8; }
         .gal-badge { font-family: 'Courier Prime'; border: 2px solid var(--ink); padding: 5px 10px; font-weight: bold; }
-        
         .gal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
         .polaroid { background: white; padding: 10px 10px 30px 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: 1px solid #ccc; transform: rotate(-2deg); }
         .polaroid:nth-child(even) { transform: rotate(2deg); margin-top: 30px; }
         .polaroid-cap { font-family: 'Permanent Marker', cursive; text-align: center; margin-top: 10px; color: #333; font-size: 1.1rem; }
-
-        /* Responsive */
-        @media (max-width: 1250px) {
-            body { flex-direction: column; overflow: auto; height: auto; }
-            .sidebar { width: 100%; height: auto; }
-            .workspace { padding: 20px; overflow: hidden; }
-            .paper { 
-        transform-origin: top left; /* Changed from top center */
-        left: 50%;
-        transform: scale(0.6) translateX(-50%); 
-    }
-        }
     </style>
 </head>
 <body>
@@ -306,6 +408,49 @@
 
         <div class="controls">
             
+            <div id="img-adv-controls">
+                <div class="img-panel-header">
+                    <span><i class="fas fa-camera-retro"></i> PHOTO STUDIO PRO</span>
+                    <i class="fas fa-times img-panel-close" onclick="deselectImage()"></i>
+                </div>
+                <div class="img-panel-body">
+                    <div class="field">
+                        <div class="control-row">
+                            <label>Zoom & Scale</label>
+                            <span class="control-val" id="disp-scale">1.0x</span>
+                        </div>
+                        <input type="range" id="inp-scale" min="1" max="3" step="0.1" value="1" oninput="updateActiveImage('scale', this.value)">
+                    </div>
+                    
+                    <div class="field">
+                        <label>Filter Profile</label>
+                        <select id="inp-filter" onchange="updateActiveImage('filter', this.value)">
+                            <option value="none">Original Color</option>
+                            <option value="grayscale">Noir (B&W)</option>
+                            <option value="sepia">Antique Sepia</option>
+                            <option value="contrast">High Drama</option>
+                        </select>
+                    </div>
+
+                    <div class="tool-grid">
+                        <input type="file" id="replace-input" style="display:none" onchange="replaceActiveImage(this)">
+                        <button class="tool-btn" onclick="document.getElementById('replace-input').click()">
+                            <i class="fas fa-cloud-upload-alt"></i> Replace
+                        </button>
+                        <button class="tool-btn" onclick="updateActiveImage('reset')">
+                            <i class="fas fa-undo-alt"></i> Reset
+                        </button>
+                    </div>
+                    <button class="tool-btn danger" style="width:100%" onclick="removeActiveImage()">
+                        <i class="fas fa-trash-alt"></i> Remove Photo
+                    </button>
+                    
+                    <div class="drag-hint">
+                        <i class="fas fa-arrows-alt"></i> Drag photo on paper to pan position
+                    </div>
+                </div>
+            </div>
+
             <div class="group">
                 <div class="group-head" onclick="toggleGroup(this)">Global Style <i class="fas fa-chevron-down"></i></div>
                 <div class="group-body">
@@ -325,64 +470,53 @@
                             <div class="color-dot" style="background:#533318;" onclick="setInk('#533318', this)"></div>
                         </div>
                     </div>
+                    
                     <div class="field">
-                        <label>Draggable Stickers (Click to Add)</label>
+                        <label>Stickers (Click to Add)</label>
                         <div class="sticker-row">
-                            <button class="sticker-btn" onclick="addSticker('stamp')">+ Stamp</button>
-                            <button class="sticker-btn" onclick="addSticker('tape')">+ Tape</button>
-                            <button class="sticker-btn" onclick="addSticker('coffee')">+ Coffee</button>
+                            <button class="sticker-btn" onclick="addSticker('stamp')">Stamp</button>
+                            <button class="sticker-btn" onclick="addSticker('tape')">Tape</button>
+                            <button class="sticker-btn" onclick="addSticker('fragile')">Fragile</button>
+                            <button class="sticker-btn" onclick="addSticker('xoxo')">XOXO</button>
+                            <button class="sticker-btn" onclick="addSticker('secret')">Secret</button>
                         </div>
-                        <p style="font-size:0.65rem; color:#777; margin-top:5px;">*Drag stickers on the paper to move them.</p>
+                        
+                        <div id="sticker-tools" class="sticker-editor">
+                            <label style="color:var(--ui-accent); font-size:0.7rem; font-weight:bold;">EDIT SELECTED STICKER</label>
+                            <div style="display:flex; gap:10px; margin-top:5px;">
+                                <div><label style="font-size:0.6rem">Rotate</label><input type="range" min="-180" max="180" value="0" oninput="rotateSticker(this.value)"></div>
+                                <div><label style="font-size:0.6rem">Size</label><input type="range" min="0.5" max="2" step="0.1" value="1" oninput="resizeSticker(this.value)"></div>
+                            </div>
+                            <button class="tool-btn danger" style="width:100%; margin-top:5px;" onclick="deleteSelectedSticker()">Delete</button>
+                        </div>
+
+                        <button class="btn-clear-stickers tool-btn" style="width:100%; margin-top:10px;" onclick="clearStickers()">Clear All Stickers</button>
                     </div>
                 </div>
             </div>
 
             <div class="group">
-                <div class="group-head" onclick="toggleGroup(this)">Header Info <i class="fas fa-chevron-down"></i></div>
+                <div class="group-head" onclick="toggleGroup(this)">Masthead Info <i class="fas fa-chevron-down"></i></div>
                 <div class="group-body">
-                    <div class="field">
-                        <label>Newspaper Name</label>
-                        <input type="text" value="The Cupids Post" oninput="updateText('.paper-title', this.value)">
-                    </div>
-                    <div class="field">
-                        <label>Left Meta (City/Vol)</label>
-                        <input type="text" value="San Francisco, CA | Vol. 1" oninput="updateText('.meta-l', this.value)">
-                    </div>
-                    <div class="field">
-                        <label>Right Meta (Date/Web)</label>
-                        <input type="text" value="14th Feb, 2024" oninput="updateText('.meta-r', this.value)">
-                    </div>
+                    <div class="field"><label>Newspaper Name</label><input type="text" value="The Cupids Post" oninput="updateText('.paper-title', this.value)"></div>
+                    <div class="field"><label>Left Meta</label><input type="text" value="San Francisco, CA | Vol. 1" oninput="updateText('.meta-l', this.value)"></div>
+                    <div class="field"><label>Right Meta</label><input type="text" value="14th Feb, 2024" oninput="updateText('.meta-r', this.value)"></div>
                 </div>
             </div>
 
             <div id="ctrl-classic" class="template-ctrl">
                 <div class="group">
-                    <div class="group-head" onclick="toggleGroup(this)">Classic Content <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-head" onclick="toggleGroup(this)">Content Editor <i class="fas fa-chevron-down"></i></div>
                     <div class="group-body">
-                        <div class="field">
-                            <label>Main Headline</label>
-                            <input type="text" value="WILL YOU BE" oninput="updateText('.c-hl-1', this.value)">
-                        </div>
-                        <div class="field">
-                            <label>Script Sub-Headline</label>
-                            <input type="text" value="My Valentine?" oninput="updateText('.c-hl-2', this.value)">
-                        </div>
-                        <div class="field">
-                            <label>Article Title</label>
-                            <input type="text" value="LOVE STORY" oninput="updateText('.c-art-title', this.value)">
-                        </div>
-                        <div class="field">
-                            <label>Article Body</label>
-                            <textarea oninput="updateText('.c-body', this.value)">Love isn't what makes the world go 'round. It is what makes the ride worthwhile. Love is a friendship that has caught on fire.</textarea>
-                        </div>
-                        <div class="field">
-                            <label>Main Photo</label>
-                            <input type="file" accept="image/*" onchange="updateImage(this, '#c-img-1')">
-                            <select onchange="setFilter('#c-img-1', this.value)" style="margin-top:5px;">
-                                <option value="f-bw">B&W</option>
-                                <option value="f-sepia">Sepia</option>
-                                <option value="f-color">Color</option>
-                            </select>
+                        <div class="field"><label>Main Headline</label><input type="text" value="WILL YOU BE" oninput="updateText('.c-hl-1', this.value)"></div>
+                        <div class="field"><label>Script Headline</label><input type="text" value="My Valentine?" oninput="updateText('.c-hl-2', this.value)"></div>
+                        <div class="field"><label>Left Title</label><input type="text" value="LOVE STORY" oninput="updateText('.c-left-title', this.value)"></div>
+                        <div class="field"><label>Left Text</label><textarea oninput="updateText('.c-left-text', this.value)">Love isn't what makes the world go 'round. It is what makes the ride worthwhile.</textarea></div>
+                        <div class="field"><label>Right Title</label><input type="text" value="WHAT IS LOVE?" oninput="updateText('.c-right-title', this.value)"></div>
+                        <div class="field"><label>Right Text</label><textarea oninput="updateText('.c-right-text', this.value)">I am fortunate to know you, that's why I want to say, to a rare and special person...</textarea></div>
+                        <div class="field"><label>Captions</label>
+                            <input type="text" placeholder="Left Caption" oninput="updateText('#c-cap-1', this.value)" style="margin-bottom:5px;">
+                            <input type="text" placeholder="Right Caption" oninput="updateText('#c-cap-2', this.value)">
                         </div>
                     </div>
                 </div>
@@ -390,55 +524,50 @@
 
             <div id="ctrl-wrapped" class="template-ctrl" style="display:none;">
                 <div class="group">
-                    <div class="group-head" onclick="toggleGroup(this)">Wrapped Content <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-head" onclick="toggleGroup(this)">Headlines & List <i class="fas fa-chevron-down"></i></div>
                     <div class="group-body">
-                        <div class="field">
-                            <label>Breaking Headline</label>
-                            <input type="text" value="BREAKING NEWS" oninput="updateText('.w-break h2', this.value)">
-                        </div>
-                        <div class="field">
-                            <label>Sub Headline</label>
-                            <input type="text" value="Fatman & Curly hit 1 year!" oninput="updateText('.w-break p', this.value)">
-                        </div>
-                        <div class="field">
-                            <label>Bullet Points (New line per item)</label>
-                            <textarea oninput="updateList(this.value)">Made origami for you
+                        <div class="field"><label>Breaking Headline</label><input type="text" value="BREAKING NEWS" oninput="updateText('.w-break h2', this.value)"></div>
+                        <div class="field"><label>Sub Headline</label><input type="text" value="Fatman & Curly hit 1 year!" oninput="updateText('.w-break p', this.value)"></div>
+                        <div class="field"><label>List Title</label><input type="text" value="ALL THE THINGS WE DID:" oninput="updateText('#w-list-title', this.value)"></div>
+                        <div class="field"><label>Bullet Points</label><textarea oninput="updateList(this.value)">Made origami for you
 Sent memes daily
-Watched all your shows
-Ate too much sushi</textarea>
-                        </div>
-                        <div class="field">
-                            <label>Center Photo</label>
-                            <input type="file" accept="image/*" onchange="updateImage(this, '#w-img-main')">
-                            <select onchange="setFilter('#w-img-main', this.value)" style="margin-top:5px;">
-                                <option value="f-bw">B&W</option>
-                                <option value="f-sepia">Sepia</option>
-                                <option value="f-color">Color</option>
-                            </select>
-                        </div>
+Watched all your shows</textarea></div>
                     </div>
                 </div>
+                <div class="group">
+                    <div class="group-head" onclick="toggleGroup(this)">Sidebars & Footer <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-body">
+                        <div class="field"><label>Left Date</label><input type="text" value="13TH OCT" oninput="updateText('#w-left-date', this.value)"></div>
+                        <div class="field"><label>Left Text</label><textarea oninput="updateText('#w-left-text', this.value)">Ever since I stepped into your life...</textarea></div>
+                        <div class="field">
+    <label>First Date Title</label>
+    <input type="text" value="FIRST DATE" oninput="updateText('#w-left-sub-date', this.value)">
+</div>
+<div class="field">
+    <label>First Date Text</label>
+    <textarea oninput="updateText('#w-left-sub-text', this.value)">I remember being so nervous...</textarea>
+</div>
+                        <hr>
+                        <div class="field"><label>Right Title</label><input type="text" value="ALL FESTIVALS" oninput="updateText('#w-right-title', this.value)"></div>
+                        <div class="field"><label>Right Text</label><textarea oninput="updateText('#w-right-text', this.value)">It's crazy to think we celebrated all...</textarea></div>
+                        <div class="field"><label>Song</label><input type="text" value="OUR SONG" oninput="updateText('#w-song-title', this.value)"></div>
+                        <hr>
+                        <div class="field"><label>Footer 1</label><input type="text" value="STAIRCASE: No explanation needed." oninput="updateFooter(0, this.value)"></div>
+                        <div class="field"><label>Footer 2</label><input type="text" value="YOUR B-DAY: Best celebration!" oninput="updateFooter(1, this.value)"></div>
+                        <div class="field"><label>Footer 3</label><input type="text" value="MY B-DAY: You made it special." oninput="updateFooter(2, this.value)"></div>
+                        <div class="field"><label>Footer 4</label><input type="text" value="SLEEPOVER: Talking until 4am." oninput="updateFooter(3, this.value)"></div>
+                    </div>
+                </div>
+            </div>
             </div>
 
             <div id="ctrl-gallery" class="template-ctrl" style="display:none;">
                 <div class="group">
-                    <div class="group-head" onclick="toggleGroup(this)">Gallery Photos <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-head" onclick="toggleGroup(this)">Captions <i class="fas fa-chevron-down"></i></div>
                     <div class="group-body">
-                        <div class="field">
-                            <label>Photo 1</label>
-                            <input type="file" accept="image/*" onchange="updateImage(this, '#g-img-1')">
-                            <input type="text" placeholder="Caption" oninput="updateText('#g-cap-1', this.value)" style="margin-top:5px;">
-                        </div>
-                        <div class="field">
-                            <label>Photo 2</label>
-                            <input type="file" accept="image/*" onchange="updateImage(this, '#g-img-2')">
-                            <input type="text" placeholder="Caption" oninput="updateText('#g-cap-2', this.value)" style="margin-top:5px;">
-                        </div>
-                         <div class="field">
-                            <label>Photo 3</label>
-                            <input type="file" accept="image/*" onchange="updateImage(this, '#g-img-3')">
-                            <input type="text" placeholder="Caption" oninput="updateText('#g-cap-3', this.value)" style="margin-top:5px;">
-                        </div>
+                        <div class="field"><label>Photo 1</label><input type="text" placeholder="Caption" oninput="updateText('#g-cap-1', this.value)"></div>
+                        <div class="field"><label>Photo 2</label><input type="text" placeholder="Caption" oninput="updateText('#g-cap-2', this.value)"></div>
+                        <div class="field"><label>Photo 3</label><input type="text" placeholder="Caption" oninput="updateText('#g-cap-3', this.value)"></div>
                     </div>
                 </div>
             </div>
@@ -458,123 +587,76 @@ Ate too much sushi</textarea>
             <div id="sticker-container"></div>
 
             <div id="tpl-classic" style="display:block;">
-                <div class="classic-head">
-                    <h1 class="classic-title paper-title">The Cupids Post</h1>
-                </div>
-                <div class="classic-meta">
-                    <span class="meta-l">San Francisco, CA | Vol. 1</span>
-                    <span class="meta-r">14th Feb, 2024</span>
-                </div>
-                
-                <div class="classic-hero">
-                    <span class="c-hl-1">WILL YOU BE</span>
-                    <span class="c-hl-2">My Valentine?</span>
-                </div>
-
+                <div class="classic-head"><h1 class="classic-title paper-title">The Cupids Post</h1></div>
+                <div class="classic-meta"><span class="meta-l">San Francisco, CA | Vol. 1</span><span class="meta-r">14th Feb, 2024</span></div>
+                <div class="classic-hero"><span class="c-hl-1">WILL YOU BE</span><span class="c-hl-2">My Valentine?</span></div>
                 <div class="classic-grid">
                     <div class="col">
-                        <div class="photo-box" style="height:300px;">
-                            <img id="c-img-1" class="f-bw" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800">
-                        </div>
-                        <br>
-                        <h3 class="c-art-title">LOVE STORY</h3>
-                        <p class="c-body">Love isn't what makes the world go 'round. It is what makes the ride worthwhile. Love is a friendship that has caught on fire. It is quiet understanding, mutual confidence, sharing, and forgiving.</p>
+                        <div class="photo-box" onclick="activateImage(this)" style="height:300px;"><img id="c-img-1" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800"></div>
+                        <div class="caption" id="c-cap-1">Love is always worth the wait</div>
+                        <h3 class="c-left-title">LOVE STORY</h3>
+                        <p class="c-left-text">Their story did not begin with certainty. It began with hesitation, distance, and two separate lives moving in different directions. Yet somehow, through conversations that stretched longer than expected and smiles shared through a screen, something steady took shape. Days that once felt routine began to feel lighter. Moments that once passed unnoticed began to matter. Over time, friendship deepened into trust, and trust quietly transformed into something warmer. What they built was not loud or dramatic, but calm and enduring — the kind of connection that feels less like coincidence and more like fate unfolding at its own perfect pace.
+</p>
                     </div>
                     <div class="col">
-                        <h3 class="c-art-title">WHAT IS LOVE?</h3>
-                        <p class="c-body">I am fortunate to know you, that's why I want to say, to a rare and special person... Happy Valentine's Day! Where there is love there is life.</p>
+                        <h3 class="c-right-title">WHAT IS LOVE?</h3>
+                        <p class="c-right-text">Love rarely announces itself with fireworks. More often, it begins quietly — with a simple conversation, an unexpected message, or a voice that slowly becomes familiar. What starts as curiosity turns into comfort, and what feels ordinary becomes something deeply meaningful. Day by day, shared laughter replaces silence, and small check-ins become the most anticipated moments of the evening. In a world that moves quickly, love grows in the pauses — in the long talks, the understanding glances, and the unspoken reassurance that someone out there is thinking of you. It is not built in grand gestures alone, but in consistency, patience, and the gentle decision to stay.
+</p>
                         <br>
-                        <div class="photo-box" style="height:200px;">
-                            <img id="c-img-2" class="f-bw" src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=800">
-                        </div>
+                        <div class="photo-box" onclick="activateImage(this)" style="height:200px;"><img id="c-img-2" src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=800"></div>
+                        <div class="caption" id="c-cap-2">Holding hands forever</div>
                     </div>
                 </div>
             </div>
 
             <div id="tpl-wrapped">
-                <div class="wrapped-head">
-                    <h1 class="wrapped-title paper-title">365 Days Wrapped</h1>
-                </div>
-                <div class="wrapped-meta">
-                    <span class="meta-l">Vol. 1 | No. 14</span>
-                    <span class="meta-r">Feb 14, 2024</span>
-                </div>
-                
+                <div class="wrapped-head"><h1 class="wrapped-title paper-title">365 Days Wrapped</h1></div>
+                <div class="wrapped-meta"><span class="meta-l">Vol. 1 | No. 14</span><span class="meta-r">Feb 14, 2024</span></div>
                 <div class="wrapped-grid">
                     <div class="w-col-side">
-                        <h4>13TH OCT</h4>
-                        <p>Ever since I stepped into your life, you always stood out. Considering you are the prettiest girl ever (respectfully). I realized I lucked out.</p>
-                        <br>
-                        <h4>FIRST DATE</h4>
-                        <p>I remember being so nervous, but your smile made everything easy.</p>
-                    </div>
+                        <h4 id="w-left-date">13TH OCT</h4><p id="w-left-text">13th October marked another beautiful chapter in their journey — a quiet reminder of how far they had come together. What began as a simple connection had grown into something steady and certain. Looking back at the days they shared, it wasn’t the big moments that stood out most, but the countless little memories that filled the space between. It became a day to pause, smile, and feel grateful for a love that kept growing stronger with time.
+</p>
+                        <h4 id="w-left-sub-date">FIRST DATE</h4><p id="w-left-sub-text">Long before the first meeting, they had already shared countless hours talking, laughing, and learning about each other. But nothing compared to the day they finally stood face to face. The world around them felt quieter, as if everything else had faded into the background. Simple things — walking together, sharing stories, sitting side by side — suddenly meant more than anything. That day didn’t need grand gestures to be special; its beauty came from how natural everything felt. It was the beginning of memories they would carry forever.
+</p>
 
+                    </div>
                     <div class="w-center">
-                        <div class="photo-box" style="height:350px;">
-                            <img id="w-img-main" class="f-bw" src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800">
-                        </div>
-                        
-                        <div class="w-break">
-                            <h2>BREAKING NEWS</h2>
-                            <p>Fatman & Curly hit 1 year!</p>
-                        </div>
-
-                        <div class="w-list">
-                            <h5>ALL THE THINGS WE DID:</h5>
-                            <ul id="w-list-ul">
-                                <li>Made origami for you</li>
-                                <li>Sent memes daily</li>
-                                <li>Watched all your shows</li>
-                                <li>Ate too much sushi</li>
-                            </ul>
-                        </div>
+                        <div class="photo-box" onclick="activateImage(this)" style="height:350px;"><img id="w-img-main" src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800"></div>
+                        <div class="w-break"><h2>BREAKING NEWS</h2><p>After 365 unforgettable days filled with laughter, growth, and countless shared memories, the journey continues stronger than ever. One year down — forever to go.
+</p></div>
+                        <div class="w-list"><h5 id="w-list-title">ALL THE THINGS WE DID:</h5><ul id="w-list-ul"><li>Made ordinary days unforgettable</li><li>Celebrated wins — big and small</li><li>Chose each other, every single day</li><li>Turned late-night talks into lasting memories</li></ul></div>
                     </div>
-
                     <div class="w-col-side">
-                        <h4>ALL FESTIVALS</h4>
-                        <p>It's crazy to think we celebrated all festivals together... Diwali, Ganesh Chaturthi, New Year. They mean so much more now.</p>
-                        <div class="photo-box" style="height:100px; margin-top:10px;">
-                             <img src="https://images.unsplash.com/photo-1511253488737-25e2270b2128?auto=format&fit=crop&w=800" class="f-bw">
-                        </div>
-                        <br>
-                        <div style="opacity:0.6; display:flex; gap:5px; align-items:center;">
-                            <i class="fab fa-spotify" style="font-size:1.5rem;"></i> <span>OUR SONG</span>
-                        </div>
+                        <h4 id="w-right-title">ALL FESTIVALS</h4><p id="w-right-text">As the months 
+                            passed, celebrations slowly 
+                            took on new meaning. Festivals were no longer just dates marked on a calendar; they became shared 
+                            experiences Lights seemed warmer, songs sounded sweeter, and even the simplest decorations felt special when seen together. 
+                            Every occasion, big or small, turned into an opportunity to create memories — late-night calls that
+                            stretched past midnight, exchanged wishes at exactly twelve, and quiet smiles that said more than 
+                            words ever could.But it wasn’t only the grand celebrations that mattered. 
+                            It was the ordinary days in between — the unexpected surprises, the random 
+                            treats, the simple act of checking in to ask, “Have you eaten?” or 
+                            “Did you reach home safely?” Somewhere along the way, they realized that 
+                            love didn’t wait for festivals to feel festive. 
+</p>
+                        <div class="photo-box" onclick="activateImage(this)" style="height:100px; margin-top:10px;"><img id="w-img-side" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800" alt="Minimalist aesthetic decor"></div>
+                        <br><div style="opacity:0.6; display:flex; gap:5px; align-items:center;"><i class="fab fa-spotify" style="font-size:1.5rem;"></i> <span id="w-song-title">OUR SONG</span></div>
                     </div>
                 </div>
-
                 <div class="w-footer">
-                    <div class="w-foot-item"><h5>STAIRCASE</h5><p>No explanation needed.</p></div>
-                    <div class="w-foot-item"><h5>YOUR B-DAY</h5><p>Best celebration ever!</p></div>
-                    <div class="w-foot-item"><h5>MY B-DAY</h5><p>You made it special.</p></div>
-                    <div class="w-foot-item"><h5>SLEEPOVER</h5><p>Talking until 4am.</p></div>
+                    <div class="w-foot-item" id="foot-0"><h5>STAIRCASE</h5><p>No explanation needed.</p></div>
+                    <div class="w-foot-item" id="foot-1"><h5>YOUR B-DAY</h5><p>Best celebration ever!</p></div>
+                    <div class="w-foot-item" id="foot-2"><h5>MY B-DAY</h5><p>You made it special.</p></div>
+                    <div class="w-foot-item" id="foot-3"><h5>SLEEPOVER</h5><p>Talking until 4am.</p></div>
                 </div>
             </div>
 
             <div id="tpl-gallery">
-                <div class="gal-head">
-                    <h1 class="gal-title paper-title">The Gallery</h1>
-                    <span class="gal-badge meta-r">FEB 14, 2024</span>
-                </div>
+                <div class="gal-head"><h1 class="gal-title paper-title">The Gallery</h1><span class="gal-badge meta-r">FEB 14, 2024</span></div>
                 <div class="gal-grid">
-                    <div class="polaroid">
-                        <div class="photo-box" style="height:350px;">
-                            <img id="g-img-1" class="f-sepia" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800">
-                        </div>
-                        <div class="polaroid-cap" id="g-cap-1">Pure Bliss</div>
-                    </div>
-                    <div class="polaroid">
-                        <div class="photo-box" style="height:350px;">
-                            <img id="g-img-2" class="f-sepia" src="https://images.unsplash.com/photo-1524638431109-93d95c968f03?auto=format&fit=crop&w=800">
-                        </div>
-                        <div class="polaroid-cap" id="g-cap-2">Forever & Always</div>
-                    </div>
-                     <div class="polaroid" style="grid-column: span 2; transform:rotate(1deg); margin-top:20px;">
-                        <div class="photo-box" style="height:400px;">
-                            <img id="g-img-3" class="f-sepia" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800">
-                        </div>
-                        <div class="polaroid-cap" id="g-cap-3">Our Best Adventure</div>
-                    </div>
+                    <div class="polaroid"><div class="photo-box" onclick="activateImage(this)" style="height:350px;"><img id="g-img-1" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800"></div><div class="polaroid-cap" id="g-cap-1">Pure Bliss</div></div>
+                    <div class="polaroid"><div class="photo-box" onclick="activateImage(this)" style="height:350px;"><img id="g-img-2" src="https://images.unsplash.com/photo-1524638431109-93d95c968f03?auto=format&fit=crop&w=800"></div><div class="polaroid-cap" id="g-cap-2">Forever & Always</div></div>
+                    <div class="polaroid" style="grid-column: span 2; transform:rotate(1deg); margin-top:20px;"><div class="photo-box" onclick="activateImage(this)" style="height:400px;"><img id="g-img-3" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800"></div><div class="polaroid-cap" id="g-cap-3">Our Best Adventure</div></div>
                 </div>
             </div>
 
@@ -582,179 +664,361 @@ Ate too much sushi</textarea>
     </main>
 
     <script>
-        // --- TEMPLATE LOGIC ---
-        function setTemplate(tpl) {
-            // Update Buttons
-            document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
-            event.target.closest('.t-btn').classList.add('active');
+        /* ========================
+           STATE & INIT
+           ======================== */
+        let selectedSticker = null;
+        let activePhotoBox = null;
+        let activeImage = null;
 
-            // Hide/Show Paper Sections
-            document.getElementById('tpl-classic').style.display = 'none';
-            document.getElementById('tpl-wrapped').style.display = 'none';
-            document.getElementById('tpl-gallery').style.display = 'none';
-            document.getElementById('tpl-' + tpl).style.display = 'block';
+        /* ========================
+           ADVANCED IMAGE LOGIC (The Filter Fix)
+           ======================== */
+        function activateImage(container) {
+            // UI Selection
+            if(activePhotoBox) activePhotoBox.classList.remove('img-selected');
+            activePhotoBox = container;
+            activeImage = container.querySelector('img');
+            activePhotoBox.classList.add('img-selected');
+            document.getElementById('img-adv-controls').style.display = 'block';
+            
+            // --- NEW: Sync Controls with Current Image State ---
+            const currentScale = activeImage.dataset.scale || 1;
+            const currentFilter = activeImage.dataset.filterType || 'none';
+            
+            document.getElementById('inp-scale').value = currentScale;
+            document.getElementById('disp-scale').innerText = parseFloat(currentScale).toFixed(1) + 'x';
+            document.getElementById('inp-filter').value = currentFilter;
 
-            // Hide/Show Sidebar Groups
-            document.querySelectorAll('.template-ctrl').forEach(el => el.style.display = 'none');
-            document.getElementById('ctrl-' + tpl).style.display = 'block';
+            // Store original if not present
+            if (!activeImage.dataset.original) {
+                activeImage.dataset.original = activeImage.src; 
+            }
 
-            // Update Name
-            const titleMap = {
-                'classic': 'The Cupids Post',
-                'wrapped': '365 Days Wrapped',
-                'gallery': 'The Gallery'
-            };
-            const name = titleMap[tpl];
-            updateText('.paper-title', name);
-            // Also update input value to match
-            document.querySelector('.group-body input').value = name;
+            initImageDrag(container, activeImage);
         }
 
-        // --- CONTENT UPDATES ---
-        function updateText(selector, val) {
-            document.querySelectorAll(selector).forEach(el => el.innerText = val);
+        function deselectImage() {
+            if(activePhotoBox) activePhotoBox.classList.remove('img-selected');
+            activePhotoBox = null;
+            activeImage = null;
+            document.getElementById('img-adv-controls').style.display = 'none';
         }
 
-        function updateList(val) {
-            const list = document.getElementById('w-list-ul');
-            list.innerHTML = '';
-            val.split('\n').forEach(line => {
-                if(line.trim()) {
-                    const li = document.createElement('li');
-                    li.innerText = line;
-                    list.appendChild(li);
-                }
-            });
-        }
-
-        function updateImage(input, selector) {
-            if (input.files && input.files[0]) {
+        // 1. UPLOAD: Stores the clean original data
+        function replaceActiveImage(input) {
+            if (input.files && input.files[0] && activeImage) {
                 const reader = new FileReader();
-                reader.onload = e => document.querySelector(selector).src = e.target.result;
+                reader.onload = e => {
+                    activeImage.src = e.target.result;
+                    activeImage.dataset.original = e.target.result;
+                    // Reset filters
+                    document.getElementById('inp-filter').value = 'none';
+                    updateActiveImage('filter', 'none');
+                    updateActiveImage('reset');
+                };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function setFilter(selector, filterClass) {
-            const img = document.querySelector(selector);
-            img.className = filterClass;
+        // 2. FILTER BAKER & RESIZER
+        function updateActiveImage(action, val) {
+            if(!activeImage) return;
+            
+            if(action === 'scale') {
+                const currentX = parseFloat(activeImage.dataset.x) || 0;
+                const currentY = parseFloat(activeImage.dataset.y) || 0;
+                activeImage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${val})`;
+                activeImage.dataset.scale = val;
+                document.getElementById('disp-scale').innerText = parseFloat(val).toFixed(1) + 'x';
+            }
+            
+            if(action === 'filter') {
+                activeImage.dataset.filterType = val; // Store state
+                
+                if (!activeImage.dataset.original) return;
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const tempImg = new Image();
+                tempImg.crossOrigin = "Anonymous";
+                tempImg.src = activeImage.dataset.original;
+
+                tempImg.onload = () => {
+                    canvas.width = tempImg.width;
+                    canvas.height = tempImg.height;
+
+                    if (val === 'grayscale') {
+                        ctx.filter = 'grayscale(100%) contrast(1.2)';
+                    } else if (val === 'sepia') {
+                        ctx.filter = 'sepia(100%) contrast(0.9) brightness(0.95)';
+                    } else if (val === 'contrast') {
+                        ctx.filter = 'contrast(1.4) saturate(1.1)';
+                    } else {
+                        ctx.filter = 'none';
+                    }
+
+                    ctx.drawImage(tempImg, 0, 0);
+                    activeImage.src = canvas.toDataURL('image/jpeg');
+                };
+            }
+
+            if(action === 'reset') {
+                activeImage.style.transform = 'translate(0px, 0px) scale(1)';
+                activeImage.dataset.x = 0; 
+                activeImage.dataset.y = 0; 
+                activeImage.dataset.scale = 1;
+                document.getElementById('inp-scale').value = 1;
+                document.getElementById('disp-scale').innerText = '1.0x';
+            }
         }
 
-        // --- GLOBAL STYLES ---
-        function toggleGroup(head) {
-            head.parentElement.classList.toggle('closed');
+        function removeActiveImage() {
+            if(!activeImage) return;
+            activeImage.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // Transparent placeholder
+            activeImage.style.backgroundColor = '#222';
         }
 
+        /* --- DRAG LOGIC (IMPROVED) --- */
+        function initImageDrag(container, img) {
+            let isDragging = false;
+            let startX, startY, initX, initY;
+
+            container.onmousedown = (e) => {
+                e.preventDefault();
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                // Get current translation or default to 0
+                initX = parseFloat(img.dataset.x) || 0;
+                initY = parseFloat(img.dataset.y) || 0;
+                container.style.cursor = 'grabbing';
+            };
+
+            window.onmousemove = (e) => {
+                if (!isDragging) return;
+                const scale = parseFloat(img.dataset.scale) || 1;
+                // We divide delta by scale to ensure drag speed feels natural regardless of zoom level
+                const deltaX = (e.clientX - startX); 
+                const deltaY = (e.clientY - startY);
+                const newX = initX + deltaX;
+                const newY = initY + deltaY;
+
+                img.style.transform = `translate(${newX}px, ${newY}px) scale(${scale})`;
+                img.dataset.x = newX;
+                img.dataset.y = newY;
+            };
+
+            window.onmouseup = () => {
+                if(isDragging) {
+                    isDragging = false;
+                    if(container) container.style.cursor = 'grab';
+                }
+            };
+        }
+
+        /* ========================
+           UI & STICKERS
+           ======================== */
+        function setTemplate(tpl) {
+            document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
+            event.target.closest('.t-btn').classList.add('active');
+            ['classic','wrapped','gallery'].forEach(t => document.getElementById('tpl-'+t).style.display = 'none');
+            document.getElementById('tpl-' + tpl).style.display = 'block';
+            document.querySelectorAll('.template-ctrl').forEach(el => el.style.display = 'none');
+            document.getElementById('ctrl-' + tpl).style.display = 'block';
+            const titleMap = { 'classic': 'The Cupids Post', 'wrapped': '365 Days Wrapped', 'gallery': 'The Gallery' };
+            updateText('.paper-title', titleMap[tpl]);
+        }
+
+        function updateText(selector, val) { document.querySelectorAll(selector).forEach(el => el.innerText = val); }
+        function updateList(val) {
+            const list = document.getElementById('w-list-ul'); list.innerHTML = '';
+            val.split('\n').forEach(line => { if(line.trim()) { const li = document.createElement('li'); li.innerText = line; list.appendChild(li); }});
+        }
+        function updateFooter(index, val) {
+            const parts = val.split(':'); const item = document.getElementById('foot-' + index);
+            if(item) { item.querySelector('h5').innerText = parts[0]||''; item.querySelector('p').innerText = parts[1]||''; }
+        }
+        function toggleVintage(mode) {
+            const paper = document.getElementById('paper');
+            mode === 'vintage' ? paper.classList.add('vintage') : paper.classList.remove('vintage');
+        }
         function setInk(color, dot) {
             document.documentElement.style.setProperty('--ink', color);
             document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
             dot.classList.add('active');
         }
+        function toggleGroup(head) { head.parentElement.classList.toggle('closed'); }
 
-        function toggleVintage(mode) {
-            const paper = document.getElementById('paper');
-            if(mode === 'vintage') paper.classList.add('vintage');
-            else paper.classList.remove('vintage');
-        }
-
-        // --- STICKERS & DRAG LOGIC ---
+        // Sticker Logic
         function addSticker(type) {
             const container = document.getElementById('sticker-container');
             const el = document.createElement('div');
             el.className = 'draggable st-' + type;
-            
-            // Random initial position
-            el.style.left = Math.random() * 400 + 'px';
-            el.style.top = Math.random() * 400 + 'px';
-            
+            el.style.left = (Math.random()*300+100)+'px'; el.style.top = (Math.random()*400+100)+'px';
             if(type === 'stamp') el.innerHTML = '<span>♥</span>APPROVED';
+            if(type === 'fragile') el.innerHTML = 'FRAGILE';
+            if(type === 'xoxo') el.innerHTML = 'XOXO';
+            if(type === 'secret') { el.innerHTML = 'TOP SECRET'; el.classList.add('st-fragile'); }
             
-            // Drag Logic
-            let isDragging = false;
-            let startX, startY, initialLeft, initialTop;
-
-            el.addEventListener('mousedown', e => {
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                initialLeft = el.offsetLeft;
-                initialTop = el.offsetTop;
-                el.style.cursor = 'grabbing';
-            });
-
-            window.addEventListener('mousemove', e => {
-                if(!isDragging) return;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                el.style.left = (initialLeft + dx) + 'px';
-                el.style.top = (initialTop + dy) + 'px';
-            });
-
-            window.addEventListener('mouseup', () => {
-                isDragging = false;
-                el.style.cursor = 'grab';
-            });
-
-            // Double click to remove
-            el.addEventListener('dblclick', () => el.remove());
-
+            el.addEventListener('mousedown', startDrag);
+            el.addEventListener('click', (e) => selectSticker(e, el));
             container.appendChild(el);
+            selectSticker(null, el);
         }
 
-        // --- DOWNLOAD ---
-        function downloadPaper() {
-    const paper = document.getElementById('paper');
-    const btn = document.querySelector('.btn-dl');
-    const oldText = btn.innerHTML;
-    
-    // 1. Force the page to the top so scroll doesn't offset the capture
-    window.scrollTo(0, 0);
+        function selectSticker(e, el) {
+            if(e) e.stopPropagation();
+            document.querySelectorAll('.draggable').forEach(d => d.classList.remove('selected'));
+            selectedSticker = el;
+            el.classList.add('selected');
+            document.getElementById('sticker-tools').classList.add('active');
+        }
 
-    // 2. Store original styles
-    const originalTransform = paper.style.transform;
-    const originalMargin = paper.style.margin;
-
-    // 3. Reset transform so html2canvas sees the true 800px width
-    paper.style.transform = 'none';
-    paper.style.margin = '0';
-    
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rendering...';
-
-    setTimeout(() => {
-        html2canvas(paper, {
-            scale: 2, // High resolution
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: "#ffffff", // Avoid transparency issues on some mobile galleries
-            width: 800,
-            height: paper.scrollHeight,
-            windowWidth: 800 // Forces the 'window' width for the canvas
-        }).then(canvas => {
-            // Convert to Blob instead of DataURL for better mobile support
-            canvas.toBlob((blob) => {
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = 'Valentine-Post.png';
-                link.href = url;
-                
-                // Append to body to ensure trigger works on all mobile browsers
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Cleanup
-                URL.revokeObjectURL(url);
-                paper.style.transform = originalTransform;
-                paper.style.margin = originalMargin;
-                btn.innerHTML = oldText;
-            }, 'image/png');
-        }).catch(err => {
-            console.error("Capture failed", err);
-            paper.style.transform = originalTransform;
-            btn.innerHTML = oldText;
+        document.getElementById('paper').addEventListener('click', (e) => {
+            if(e.target.id === 'paper' || e.target.id === 'sticker-container') {
+                if(selectedSticker) selectedSticker.classList.remove('selected');
+                selectedSticker = null;
+                document.getElementById('sticker-tools').classList.remove('active');
+                deselectImage();
+            }
         });
-    }, 200); 
+
+        function rotateSticker(val) {
+            if(selectedSticker) {
+                const s = selectedSticker.dataset.scale || 1;
+                selectedSticker.style.transform = `rotate(${val}deg) scale(${s})`;
+                selectedSticker.dataset.rotate = val;
+            }
+        }
+        function resizeSticker(val) {
+            if(selectedSticker) {
+                const r = selectedSticker.dataset.rotate || 0;
+                selectedSticker.style.transform = `rotate(${r}deg) scale(${val})`;
+                selectedSticker.dataset.scale = val;
+            }
+        }
+        function deleteSelectedSticker() { if(selectedSticker) { selectedSticker.remove(); document.getElementById('sticker-tools').classList.remove('active'); } }
+        function clearStickers() { document.getElementById('sticker-container').innerHTML = ''; }
+
+        let isDragSticker = false; let sX, sY, sL, sT;
+        function startDrag(e) {
+            if(e.target.closest('.sticker-editor')) return;
+            isDragSticker = true;
+            selectedSticker = e.target.closest('.draggable');
+            selectSticker(null, selectedSticker);
+            sX = e.clientX; sY = e.clientY;
+            sL = selectedSticker.offsetLeft; sT = selectedSticker.offsetTop;
+            window.addEventListener('mousemove', dragMove);
+            window.addEventListener('mouseup', dragEnd);
+        }
+        function dragMove(e) {
+            if(!isDragSticker) return;
+            const dx = e.clientX - sX; const dy = e.clientY - sY;
+            selectedSticker.style.left = (sL + dx) + 'px'; selectedSticker.style.top = (sT + dy) + 'px';
+        }
+        function dragEnd() {
+            isDragSticker = false;
+            window.removeEventListener('mousemove', dragMove);
+            window.removeEventListener('mouseup', dragEnd);
+        }
+
+        /* ========================
+           DOWNLOAD (WIDENING FIX APPLIED HERE)
+           ======================== */
+        function downloadPaper() {
+            if(selectedSticker) selectedSticker.classList.remove('selected');
+            if(activePhotoBox) activePhotoBox.classList.remove('img-selected');
+
+            const paper = document.getElementById('paper');
+            const btn = document.querySelector('.btn-dl');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rendering...';
+
+            html2canvas(paper, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: null,
+                // THE FIX: Intercept the clone to manually fix image sizing
+                onclone: (clonedDoc) => {
+                    const images = clonedDoc.querySelectorAll('.photo-box img');
+                    images.forEach(img => {
+                        const box = img.parentElement;
+                        const w = box.offsetWidth;
+                        const h = box.offsetHeight;
+                        const imgW = img.naturalWidth;
+                        const imgH = img.naturalHeight;
+                        
+                        // Calculate aspect ratios
+                        const boxRatio = w / h;
+                        const imgRatio = imgW / imgH;
+
+                        // Simulate 'object-fit: cover' behavior by setting explicit dimensions
+                        // This prevents html2canvas from stretching (widening) the image
+                        img.style.objectFit = 'none'; // Disable browser handling
+                        
+                        if (boxRatio > imgRatio) {
+                            // Box is wider relative to image -> Match Width
+                            img.style.width = '100%';
+                            img.style.height = 'auto';
+                        } else {
+                            // Box is taller relative to image -> Match Height
+                            img.style.height = '100%';
+                            img.style.width = 'auto';
+                        }
+                        
+                        // Center the image manually using Flexbox on parent (most reliable for canvas)
+                        box.style.display = 'flex';
+                        box.style.alignItems = 'center';
+                        box.style.justifyContent = 'center';
+                        img.style.position = 'relative'; 
+                        // Note: User transforms (pan/zoom) are preserved automatically by the clone
+                    });
+                }
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'My-Chronicle.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                btn.innerHTML = oldText;
+            }).catch(e => {
+                alert("Error: " + e.message);
+                btn.innerHTML = oldText;
+            });
+        }
+        /* ========================
+   MOBILE AUTO-SCALING (FIXED)
+   ======================== */
+function adjustPaperScale() {
+    const paper = document.getElementById('paper');
+    const workspace = document.querySelector('.workspace');
+    
+    // Get actual width of the container
+    const availableWidth = workspace.offsetWidth;
+    const paperWidth = 800; // Fixed paper width
+    const margin = 20;
+
+    const isMobile = window.innerWidth <= 1100;
+
+    if (isMobile) { 
+        const scale = (availableWidth - margin) / paperWidth; 
+        
+        paper.style.transform = `scale(${scale})`;
+        paper.style.transformOrigin = 'top center'; 
+        
+        // Adjust margin bottom so you can see the whole paper
+        const h = 1150; 
+        paper.style.marginBottom = `-${h * (1 - scale)}px`;
+    } else {
+        paper.style.transform = 'none';
+        paper.style.marginBottom = '0';
+    }
 }
+
+window.addEventListener('resize', adjustPaperScale);
+window.addEventListener('load', adjustPaperScale);
     </script>
 </body>
 </html>
