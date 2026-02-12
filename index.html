@@ -276,7 +276,8 @@
         /* --- DRAGGABLE STICKERS --- */
         .draggable {
             position: absolute; cursor: grab; z-index: 100; user-select: none;
-            transition: transform 0.1s;
+            transition: transform 0.1s;touch-action: none;
+
         }
         .draggable:active { cursor: grabbing; }
         .draggable.selected { outline: 2px dashed var(--ui-accent); outline-offset: 5px; }
@@ -918,7 +919,10 @@ function startDrag(e) {
     e.preventDefault();
 
     isDragSticker = true;
-    selectedSticker = e.target.closest('.draggable');
+
+    // ✅ IMPORTANT: use currentTarget (the element we attached event to)
+    selectedSticker = e.currentTarget;
+
     selectSticker(null, selectedSticker);
 
     sX = e.clientX;
@@ -930,6 +934,7 @@ function startDrag(e) {
     window.addEventListener('pointermove', dragMove);
     window.addEventListener('pointerup', dragEnd);
 }
+
 
 function dragMove(e) {
     if(!isDragSticker) return;
