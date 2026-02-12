@@ -330,7 +330,20 @@
             body { flex-direction: column; overflow: auto; height: auto; }
             .sidebar { width: 100%; height: auto; order: 2; }
             .workspace { padding: 20px; overflow: hidden; order: 1; min-height: 60vh; }
-            .paper { transform-origin: top center; transform: scale(0.6); margin-bottom: -400px; }
+            .paper {
+            width: 800px;
+            /* CRITICAL MOBILE FIX: PREVENT SQUISHING */
+            flex-shrink: 0; 
+            min-height: 1150px;
+            background: var(--paper-bg);
+            color: var(--ink);
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+            transform-origin: top center; /* Scales from top down */
+            overflow: hidden;
+        }
         }
 
         /* ==================== TEMPLATES ==================== */
