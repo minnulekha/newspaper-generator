@@ -928,70 +928,54 @@ Watched all your shows</textarea></div>
            DOWNLOAD (WIDENING FIX APPLIED HERE)
            ======================== */
         function downloadPaper() {
-            if(selectedSticker) selectedSticker.classList.remove('selected');
-            if(activePhotoBox) activePhotoBox.classList.remove('img-selected');
+    if(selectedSticker) selectedSticker.classList.remove('selected');
+    if(activePhotoBox) activePhotoBox.classList.remove('img-selected');
 
-            const paper = document.getElementById('paper');
-            const oldShadow = paper.style.boxShadow;
-paper.style.boxShadow = 'none';
+    const paper = document.getElementById('paper');
+    const btn = document.querySelector('.btn-dl');
 
-            const btn = document.querySelector('.btn-dl');
-            const oldText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rendering...';
+    const oldText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rendering...';
 
-            html2canvas(paper, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: null,
-                // THE FIX: Intercept the clone to manually fix image sizing
-                onclone: (clonedDoc) => {
-                    const images = clonedDoc.querySelectorAll('.photo-box img');
-                    images.forEach(img => {
-                        const box = img.parentElement;
-                        const w = box.offsetWidth;
-                        const h = box.offsetHeight;
-                        const imgW = img.naturalWidth;
-                        const imgH = img.naturalHeight;
-                        
-                        // Calculate aspect ratios
-                        const boxRatio = w / h;
-                        const imgRatio = imgW / imgH;
+    /* ------------------------------------------------
+       STEP 1: create clean clone (NO scale, NO shadow)
+       ------------------------------------------------ */
+    const clone = paper.cloneNode(true);
 
-                        // Simulate 'object-fit: cover' behavior by setting explicit dimensions
-                        // This prevents html2canvas from stretching (widening) the image
-                        img.style.objectFit = 'none'; // Disable browser handling
-                        
-                        if (boxRatio > imgRatio) {
-                            // Box is wider relative to image -> Match Width
-                            img.style.width = '100%';
-                            img.style.height = 'auto';
-                        } else {
-                            // Box is taller relative to image -> Match Height
-                            img.style.height = '100%';
-                            img.style.width = 'auto';
-                        }
-                        
-                        // Center the image manually using Flexbox on parent (most reliable for canvas)
-                        box.style.display = 'flex';
-                        box.style.alignItems = 'center';
-                        box.style.justifyContent = 'center';
-                        img.style.position = 'relative'; 
-                        // Note: User transforms (pan/zoom) are preserved automatically by the clone
-                    });
-                }
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'My-Chronicle.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                btn.innerHTML = oldText;
-            }).catch(e => {
-                alert("Error: " + e.message);
-                paper.style.boxShadow = oldShadow;
-                btn.innerHTML = oldText;
-            });
-        }
+    clone.style.transform = 'none';      // remove mobile scale
+    clone.style.marginBottom = '0';
+    clone.style.boxShadow = 'none';     // remove shadow
+    clone.style.position = 'fixed';
+    clone.style.left = '-99999px';
+    clone.style.top = '0';
+
+    document.body.appendChild(clone);
+
+    /* ------------------------------------------------
+       STEP 2: render clone instead of original
+       ------------------------------------------------ */
+    html2canvas(clone, {
+        scale: window.devicePixelRatio > 1 ? 3 : 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+    }).then(canvas => {
+
+        const link = document.createElement('a');
+        link.download = 'My-Chronicle.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        document.body.removeChild(clone);
+        btn.innerHTML = oldText;
+
+    }).catch(e => {
+        alert("Error: " + e.message);
+        document.body.removeChild(clone);
+        btn.innerHTML = oldText;
+    });
+}
+
         /* ========================
    MOBILE AUTO-SCALING (FIXED)
    ======================== */
