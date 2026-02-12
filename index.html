@@ -310,6 +310,8 @@
             overflow: hidden;
             cursor: grab;
             transition: box-shadow 0.2s;
+            touch-action: none;
+
         }
         .photo-box:active { cursor: grabbing; }
         /* Enhanced Selection State */
@@ -786,7 +788,8 @@ Watched all your shows</textarea></div>
             let isDragging = false;
             let startX, startY, initX, initY;
 
-            container.onmousedown = (e) => {
+            container.onpointerdown = (e) => {
+
                 e.preventDefault();
                 isDragging = true;
                 startX = e.clientX;
@@ -797,7 +800,8 @@ Watched all your shows</textarea></div>
                 container.style.cursor = 'grabbing';
             };
 
-            window.onmousemove = (e) => {
+            window.onpointermove = (e) => {
+
                 if (!isDragging) return;
                 const scale = parseFloat(img.dataset.scale) || 1;
                 // We divide delta by scale to ensure drag speed feels natural regardless of zoom level
@@ -811,7 +815,8 @@ Watched all your shows</textarea></div>
                 img.dataset.y = newY;
             };
 
-            window.onmouseup = () => {
+            window.onpointerup = () => {
+
                 if(isDragging) {
                     isDragging = false;
                     if(container) container.style.cursor = 'grab';
@@ -864,7 +869,7 @@ Watched all your shows</textarea></div>
             if(type === 'xoxo') el.innerHTML = 'XOXO';
             if(type === 'secret') { el.innerHTML = 'TOP SECRET'; el.classList.add('st-fragile'); }
             
-            el.addEventListener('mousedown', startDrag);
+            el.addEventListener('pointerdown', startDrag);
             el.addEventListener('click', (e) => selectSticker(e, el));
             container.appendChild(el);
             selectSticker(null, el);
@@ -904,27 +909,44 @@ Watched all your shows</textarea></div>
         function deleteSelectedSticker() { if(selectedSticker) { selectedSticker.remove(); document.getElementById('sticker-tools').classList.remove('active'); } }
         function clearStickers() { document.getElementById('sticker-container').innerHTML = ''; }
 
-        let isDragSticker = false; let sX, sY, sL, sT;
-        function startDrag(e) {
-            if(e.target.closest('.sticker-editor')) return;
-            isDragSticker = true;
-            selectedSticker = e.target.closest('.draggable');
-            selectSticker(null, selectedSticker);
-            sX = e.clientX; sY = e.clientY;
-            sL = selectedSticker.offsetLeft; sT = selectedSticker.offsetTop;
-            window.addEventListener('mousemove', dragMove);
-            window.addEventListener('mouseup', dragEnd);
-        }
-        function dragMove(e) {
-            if(!isDragSticker) return;
-            const dx = e.clientX - sX; const dy = e.clientY - sY;
-            selectedSticker.style.left = (sL + dx) + 'px'; selectedSticker.style.top = (sT + dy) + 'px';
-        }
-        function dragEnd() {
-            isDragSticker = false;
-            window.removeEventListener('mousemove', dragMove);
-            window.removeEventListener('mouseup', dragEnd);
-        }
+        let isDragSticker = false;
+let sX, sY, sL, sT;
+
+function startDrag(e) {
+    if(e.target.closest('.sticker-editor')) return;
+
+    e.preventDefault();
+
+    isDragSticker = true;
+    selectedSticker = e.target.closest('.draggable');
+    selectSticker(null, selectedSticker);
+
+    sX = e.clientX;
+    sY = e.clientY;
+
+    sL = selectedSticker.offsetLeft;
+    sT = selectedSticker.offsetTop;
+
+    window.addEventListener('pointermove', dragMove);
+    window.addEventListener('pointerup', dragEnd);
+}
+
+function dragMove(e) {
+    if(!isDragSticker) return;
+
+    const dx = e.clientX - sX;
+    const dy = e.clientY - sY;
+
+    selectedSticker.style.left = (sL + dx) + 'px';
+    selectedSticker.style.top  = (sT + dy) + 'px';
+}
+
+function dragEnd() {
+    isDragSticker = false;
+    window.removeEventListener('pointermove', dragMove);
+    window.removeEventListener('pointerup', dragEnd);
+}
+
 
         /* ========================
            DOWNLOAD (WIDENING FIX APPLIED HERE)
