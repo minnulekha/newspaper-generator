@@ -927,9 +927,14 @@ Watched all your shows</textarea></div>
         /* ========================
            DOWNLOAD (WIDENING FIX APPLIED HERE)
            ======================== */
+       /* ========================
+           DOWNLOAD (UPDATED: SHADOW REMOVAL FIX)
+           ======================== */
         function downloadPaper() {
+            // 1. Clear selections before capture
             if(selectedSticker) selectedSticker.classList.remove('selected');
             if(activePhotoBox) activePhotoBox.classList.remove('img-selected');
+            document.getElementById('img-adv-controls').style.display = 'none'; // Ensure panel is closed
 
             const paper = document.getElementById('paper');
             const btn = document.querySelector('.btn-dl');
@@ -940,9 +945,20 @@ Watched all your shows</textarea></div>
                 scale: 2,
                 useCORS: true,
                 allowTaint: true,
-                backgroundColor: null,
-                // THE FIX: Intercept the clone to manually fix image sizing
+                backgroundColor: null, // Transparent background
+                
+                // THE FIX: We modify the 'cloned' version of the paper before it gets painted
                 onclone: (clonedDoc) => {
+                    const clonedPaper = clonedDoc.getElementById('paper');
+                    
+                    // --- STEP 1: REMOVE SHADOWS & RESET MOBILE SCALING ---
+                    // This ensures the download is flat (no outer shadow) and full resolution
+                    clonedPaper.style.boxShadow = 'none'; 
+                    clonedPaper.style.transform = 'none'; 
+                    clonedPaper.style.marginBottom = '0';
+                    clonedPaper.style.borderRadius = '0'; // Optional: ensures sharp corners
+
+                    // --- STEP 2: FIX IMAGE SIZING (Your existing logic) ---
                     const images = clonedDoc.querySelectorAll('.photo-box img');
                     images.forEach(img => {
                         const box = img.parentElement;
@@ -951,30 +967,23 @@ Watched all your shows</textarea></div>
                         const imgW = img.naturalWidth;
                         const imgH = img.naturalHeight;
                         
-                        // Calculate aspect ratios
                         const boxRatio = w / h;
                         const imgRatio = imgW / imgH;
 
-                        // Simulate 'object-fit: cover' behavior by setting explicit dimensions
-                        // This prevents html2canvas from stretching (widening) the image
-                        img.style.objectFit = 'none'; // Disable browser handling
+                        img.style.objectFit = 'none'; 
                         
                         if (boxRatio > imgRatio) {
-                            // Box is wider relative to image -> Match Width
                             img.style.width = '100%';
                             img.style.height = 'auto';
                         } else {
-                            // Box is taller relative to image -> Match Height
                             img.style.height = '100%';
                             img.style.width = 'auto';
                         }
                         
-                        // Center the image manually using Flexbox on parent (most reliable for canvas)
                         box.style.display = 'flex';
                         box.style.alignItems = 'center';
                         box.style.justifyContent = 'center';
                         img.style.position = 'relative'; 
-                        // Note: User transforms (pan/zoom) are preserved automatically by the clone
                     });
                 }
             }).then(canvas => {
