@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Chronicle - Ultimate Premium Editor</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Oswald:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Great+Vibes&family=Cinzel:wght@700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Courier+Prime&family=Permanent+Marker&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* UI Theme */
+            --ui-bg: #1a1a1d;
+            --ui-sidebar: #25252b;
+            --ui-border: #3a3a40;
+            --ui-text: #e0e0e0;
+            --ui-accent: #c3073f;
+            --ui-danger: #e74c3c;
+            
+            /* Paper Dynamic Vars */
+            --ink: #1a1a1a;
+            --paper-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--ui-bg);
+            color: var(--ui-text);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 420px;
+            background: var(--ui-sidebar);
+            border-right: 1px solid var(--ui-border);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.4);
+        }
+
+        .brand {
+            padding: 20px;
+            text-align: center;
+            background: #151518;
+            border-bottom: 1px solid var(--ui-border);
+        }
+        .brand h1 { margin: 0; font-family: 'Cinzel', serif; color: white; letter-spacing: 2px; font-size: 1.4rem; }
+        .brand span { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+
+        /* Template Switcher */
+        .template-nav {
+            display: flex;
+            padding: 10px;
+            gap: 5px;
+            background: #1f1f23;
+            border-bottom: 1px solid var(--ui-border);
+        }
+        .t-btn {
+            flex: 1;
+            background: transparent;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .t-btn:hover { background: #333; color: white; }
+        .t-btn.active { background: var(--ui-accent); border-color: var(--ui-accent); color: white; }
+
+        /* Scrollable Controls */
+        .controls {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        /* Accordion Groups */
+        .group {
+            margin-bottom: 15px;
+            background: #2c2c33;
+            border: 1px solid var(--ui-border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .group-head {
+            padding: 12px 15px;
+            background: #34343d;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .group-head:hover { background: #3e3e48; }
+        .group-body { padding: 15px; display: block; border-top: 1px solid var(--ui-border); }
+        .group.closed .group-body { display: none; }
+        .group.closed .group-head i { transform: rotate(-90deg); }
+
+        /* Inputs */
+        .field { margin-bottom: 12px; }
+        .field label { display: block; font-size: 0.75rem; color: #999; margin-bottom: 5px; }
+        input[type="text"], textarea, select {
+            width: 100%; padding: 10px; background: #1a1a1d; border: 1px solid #444; 
+            color: white; border-radius: 4px; font-family: inherit; font-size: 0.85rem;
+        }
+        input:focus, textarea:focus { border-color: var(--ui-accent); }
+        textarea { min-height: 60px; resize: vertical; }
+
+        /* Color & Range */
+        .color-row { display: flex; gap: 10px; }
+        .color-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .color-dot.active { border-color: white; transform: scale(1.1); }
+        
+        /* Sticker Controls */
+        .sticker-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        .sticker-btn {
+            background: #444; color: white; border: none; padding: 5px 10px; 
+            border-radius: 20px; font-size: 0.7rem; cursor: pointer;
+        }
+        .sticker-btn:hover { background: var(--ui-accent); }
+        
+        .btn-clear-stickers {
+            width: 100%; padding: 8px; background: var(--ui-danger); color: white;
+            border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold;
+        }
+        .btn-clear-stickers:hover { background: #c0392b; }
+
+        /* Action Bar */
+        .actions {
+            padding: 20px;
+            background: #151518;
+            border-top: 1px solid var(--ui-border);
+        }
+        .btn-dl {
+            width: 100%; padding: 15px; background: #27ae60; color: white; font-weight: bold;
+            border: none; border-radius: 6px; cursor: pointer; display: flex; 
+            justify-content: center; align-items: center; gap: 10px; font-size: 1rem;
+        }
+        .btn-dl:hover { background: #219150; }
+
+        /* --- PREVIEW AREA --- */
+        .workspace {
+            flex: 1;
+            background: #555;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+            padding: 40px;
+            position: relative;
+        }
+
+        .paper {
+            width: 800px;
+            min-height: 1150px; /* A4ish ratio */
+            background: var(--paper-bg);
+            color: var(--ink);
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transition: transform 0.3s;
+            overflow: hidden; /* Clips dragged stickers */
+        }
+
+        /* VINTAGE MODE */
+        .paper.vintage {
+            background-color: #f3e5c9;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+        .paper.vintage .photo-box { filter: sepia(0.4) contrast(1.1); }
+
+        /* --- DRAGGABLE ELEMENTS --- */
+        .draggable {
+            position: absolute;
+            cursor: grab;
+            z-index: 100;
+            user-select: none;
+        }
+        .draggable:active { cursor: grabbing; }
+
+        .st-stamp {
+            width: 120px; height: 120px;
+            border: 4px double #c0392b; border-radius: 50%;
+            color: #c0392b; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-family: 'Stencil', sans-serif; font-weight: bold;
+            opacity: 0.8; mix-blend-mode: multiply; transform: rotate(-15deg);
+            background: rgba(255,255,255,0.1);
+        }
+        .st-tape {
+            width: 140px; height: 35px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transform: rotate(3deg);
+        }
+        .st-coffee {
+            width: 150px; height: 150px;
+            border: 15px solid #5a3e2b;
+            border-radius: 50%;
+            opacity: 0.15;
+            filter: blur(2px);
+            pointer-events: none; /* Let clicks pass through coffee */
+        }
+
+        /* --- GLOBAL TYPOGRAPHY --- */
+        .photo-box { background: #ddd; overflow: hidden; position: relative; transition: 0.3s; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .caption { font-family: 'Merriweather', serif; font-size: 0.75rem; font-style: italic; margin-top: 5px; text-align: center; color: #555; }
+        
+        .f-bw { filter: grayscale(100%) contrast(1.15); }
+        .f-sepia { filter: sepia(0.8) contrast(0.9); }
+        .f-color { filter: none; }
+
+        /* =========================================
+           TEMPLATE 1: CLASSIC (Cupids Post)
+           ========================================= */
+        #tpl-classic { display: none; }
+        .classic-head { text-align: center; border-bottom: 4px double var(--ink); padding-bottom: 10px; margin-bottom: 20px; }
+        .classic-title { font-family: 'UnifrakturMaguntia'; font-size: 5.5rem; line-height: 0.9; margin: 0; }
+        .classic-meta { display: flex; justify-content: space-between; border-bottom: 1px solid var(--ink); padding: 5px 0; font-family: 'Merriweather'; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 20px; }
+        
+        .classic-hero { text-align: center; margin-bottom: 30px; }
+        .c-hl-1 { font-family: 'Oswald'; font-size: 5rem; text-transform: uppercase; line-height: 0.9; }
+        .c-hl-2 { font-family: 'Great Vibes'; font-size: 4.5rem; display: block; margin-top: -20px; font-weight: 400; }
+        
+        .classic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        /* Left Col */
+        .c-left-title { font-family: 'Oswald'; border-bottom: 1px solid var(--ink); margin: 15px 0 10px 0; font-size: 1.2rem; text-transform: uppercase; }
+        .c-left-text { font-family: 'Merriweather'; font-size: 0.9rem; line-height: 1.6; text-align: justify; }
+        
+        /* Right Col */
+        .c-right-title { font-family: 'Oswald'; border-bottom: 1px solid var(--ink); margin: 0 0 10px 0; font-size: 1.2rem; text-transform: uppercase; }
+        .c-right-text { font-family: 'Merriweather'; font-size: 0.9rem; line-height: 1.6; text-align: justify; margin-bottom: 15px; }
+
+        /* =========================================
+           TEMPLATE 2: WRAPPED (365 Days)
+           ========================================= */
+        #tpl-wrapped { display: none; }
+        .wrapped-head { text-align: center; border-bottom: 2px solid var(--ink); padding-bottom: 5px; margin-bottom: 5px; }
+        .wrapped-title { font-family: 'UnifrakturMaguntia'; font-size: 4.8rem; margin: 0; }
+        .wrapped-meta { display: flex; justify-content: space-between; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 3px 0; font-family: 'Merriweather'; font-size: 0.65rem; text-transform: uppercase; margin-bottom: 20px; }
+        
+        .wrapped-grid { display: grid; grid-template-columns: 160px 1fr 160px; gap: 20px; }
+        
+        /* Side Cols */
+        .w-col-side { font-family: 'Merriweather'; font-size: 0.75rem; text-align: justify; line-height: 1.4; }
+        .w-col-side h4 { font-family: 'Oswald'; font-size: 1.2rem; margin: 0 0 5px 0; border-bottom: 1px solid var(--ink); }
+        .w-col-side p { margin-bottom: 15px; }
+        
+        /* Center */
+        .w-center { text-align: center; }
+        .w-break { border-top: 3px double var(--ink); border-bottom: 3px double var(--ink); padding: 10px 0; margin: 15px 0; }
+        .w-break h2 { font-family: 'Playfair Display'; font-size: 2.2rem; margin: 0; line-height: 1; text-transform: uppercase; }
+        .w-break p { font-family: 'Great Vibes'; font-size: 1.8rem; margin: 5px 0 0 0; }
+        
+        .w-list { text-align: left; background: rgba(0,0,0,0.03); padding: 15px; border: 1px solid rgba(0,0,0,0.1); }
+        .w-list h5 { font-family: 'Oswald'; margin: 0 0 10px 0; font-size: 0.9rem; }
+        .w-list ul { margin: 0; padding-left: 20px; font-family: 'Merriweather'; font-size: 0.85rem; }
+        .w-list li { margin-bottom: 5px; }
+
+        .w-footer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--ink); }
+        .w-foot-item h5 { font-family: 'Oswald'; margin: 0; font-size: 0.8rem; color: #666; text-transform: uppercase; }
+        .w-foot-item p { font-family: 'Merriweather'; margin: 0; font-size: 0.7rem; }
+
+        /* =========================================
+           TEMPLATE 3: GALLERY (Snapshot)
+           ========================================= */
+        #tpl-gallery { display: none; }
+        .gal-head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid var(--ink); padding-bottom: 10px; margin-bottom: 25px; }
+        .gal-title { font-family: 'Playfair Display'; font-size: 4rem; margin: 0; font-weight: 900; line-height: 0.8; }
+        .gal-badge { font-family: 'Courier Prime'; border: 2px solid var(--ink); padding: 5px 10px; font-weight: bold; }
+        
+        .gal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .polaroid { background: white; padding: 10px 10px 30px 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: 1px solid #ccc; transform: rotate(-2deg); }
+        .polaroid:nth-child(even) { transform: rotate(2deg); margin-top: 30px; }
+        .polaroid-cap { font-family: 'Permanent Marker', cursive; text-align: center; margin-top: 10px; color: #333; font-size: 1.1rem; }
+
+        /* Responsive */
+        @media (max-width: 1250px) {
+            body { flex-direction: column; overflow: auto; height: auto; }
+            .sidebar { width: 100%; height: auto; }
+            .workspace { padding: 20px; overflow: hidden; }
+            .paper { transform-origin: top center; transform: scale(0.65); margin-bottom: -400px; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <h1>THE CHRONICLE</h1>
+            <span>Premium Editor Suite</span>
+        </div>
+
+        <div class="template-nav">
+            <button class="t-btn active" onclick="setTemplate('classic')"><i class="fas fa-newspaper"></i> Classic</button>
+            <button class="t-btn" onclick="setTemplate('wrapped')"><i class="fas fa-list-alt"></i> Wrapped</button>
+            <button class="t-btn" onclick="setTemplate('gallery')"><i class="fas fa-images"></i> Gallery</button>
+        </div>
+
+        <div class="controls">
+            
+            <div class="group">
+                <div class="group-head" onclick="toggleGroup(this)">Global Style <i class="fas fa-chevron-down"></i></div>
+                <div class="group-body">
+                    <div class="field">
+                        <label>Paper Style</label>
+                        <select onchange="toggleVintage(this.value)">
+                            <option value="clean">Modern White</option>
+                            <option value="vintage">Vintage Aged</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Ink Color</label>
+                        <div class="color-row">
+                            <div class="color-dot active" style="background:#1a1a1a;" onclick="setInk('#1a1a1a', this)"></div>
+                            <div class="color-dot" style="background:#2c3e50;" onclick="setInk('#2c3e50', this)"></div>
+                            <div class="color-dot" style="background:#6D214F;" onclick="setInk('#6D214F', this)"></div>
+                            <div class="color-dot" style="background:#533318;" onclick="setInk('#533318', this)"></div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Stickers (Double-click sticker to delete)</label>
+                        <div class="sticker-row">
+                            <button class="sticker-btn" onclick="addSticker('stamp')">+ Stamp</button>
+                            <button class="sticker-btn" onclick="addSticker('tape')">+ Tape</button>
+                            <button class="sticker-btn" onclick="addSticker('coffee')">+ Coffee</button>
+                        </div>
+                        <button class="btn-clear-stickers" onclick="clearStickers()">Clear All Stickers</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group">
+                <div class="group-head" onclick="toggleGroup(this)">Masthead Info <i class="fas fa-chevron-down"></i></div>
+                <div class="group-body">
+                    <div class="field">
+                        <label>Newspaper Name</label>
+                        <input type="text" value="The Cupids Post" oninput="updateText('.paper-title', this.value)">
+                    </div>
+                    <div class="field">
+                        <label>Left Meta (City/Vol)</label>
+                        <input type="text" value="San Francisco, CA | Vol. 1" oninput="updateText('.meta-l', this.value)">
+                    </div>
+                    <div class="field">
+                        <label>Right Meta (Date/Web)</label>
+                        <input type="text" value="14th Feb, 2024" oninput="updateText('.meta-r', this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <div id="ctrl-classic" class="template-ctrl">
+                <div class="group">
+                    <div class="group-head" onclick="toggleGroup(this)">Headlines <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-body">
+                        <div class="field">
+                            <label>Main Headline</label>
+                            <input type="text" value="WILL YOU BE" oninput="updateText('.c-hl-1', this.value)">
+                        </div>
+                        <div class="field">
+                            <label>Script Sub-Headline</label>
+                            <input type="text" value="My Valentine?" oninput="updateText('.c-hl-2', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div class="group-head" onclick="toggleGroup(this)">Left Column <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-body">
+                        <div class="field">
+                            <label>Main Photo</label>
+                            <input type="file" accept="image/*" onchange="updateImage(this, '#c-img-1')">
+                            <select onchange="setFilter('#c-img-1', this.value)" style="margin-top:5px;">
+                                <option value="f-bw">B&W</option>
+                                <option value="f-sepia">Sepia</option>
+                                <option value="f-color">Color</option>
+                            </select>
+                            <input type="text" placeholder="Caption" oninput="updateText('#c-cap-1', this.value)" style="margin-top:5px;">
+                        </div>
+                        <div class="field">
+                            <label>Section Title</label>
+                            <input type="text" value="LOVE STORY" oninput="updateText('.c-left-title', this.value)">
+                        </div>
+                        <div class="field">
+                            <label>Column Text</label>
+                            <textarea oninput="updateText('.c-left-text', this.value)">Love isn't what makes the world go 'round. It is what makes the ride worthwhile. Love is a friendship that has caught on fire.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div class="group-head" onclick="toggleGroup(this)">Right Column <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-body">
+                        <div class="field">
+                            <label>Article Title</label>
+                            <input type="text" value="WHAT IS LOVE?" oninput="updateText('.c-right-title', this.value)">
+                        </div>
+                        <div class="field">
+                            <label>Column Text</label>
+                            <textarea oninput="updateText('.c-right-text', this.value)">I am fortunate to know you, that's why I want to say, to a rare and special person... Happy Valentine's Day! Where there is love there is life.</textarea>
+                        </div>
+                        <div class="field">
+                            <label>Secondary Photo</label>
+                            <input type="file" accept="image/*" onchange="updateImage(this, '#c-img-2')">
+                             <select onchange="setFilter('#c-img-2', this.value)" style="margin-top:5px;">
+                                <option value="f-bw">B&W</option>
+                                <option value="f-sepia">Sepia</option>
+                                <option value="f-color">Color</option>
+                            </select>
+                            <input type="text" placeholder="Caption" oninput="updateText('#c-cap-2', this.value)" style="margin-top:5px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ctrl-wrapped" class="template-ctrl" style="display:none;">
+                <div class="group">
+                    <div class="group-head" onclick="toggleGroup(this)">Center Focus <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-body">
+                        <div class="field">
+                            <label>Center Photo</label>
+                            <input type="file" accept="image/*" onchange="updateImage(this, '#w-img-main')">
+                             <select onchange="setFilter('#w-img-main', this.value)" style="margin-top:5px;">
+                                <option value="f-bw">B&W</option>
+                                <option value="f-sepia">Sepia</option>
+                                <option value="f-color">Color</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Breaking Headline</label>
+                            <input type="text" value="BREAKING NEWS" oninput="updateText('.w-break h2', this.value)">
+                        </div>
+                        <div class="field">
+                            <label>Sub Headline</label>
+                            <input type="text" value="Fatman & Curly hit 1 year!" oninput="updateText('.w-break p', this.value)">
+                        </div>
+                        <div class="field">
+                            <label>List Title</label>
+                             <input type="text" value="ALL THE THINGS WE DID:" oninput="updateText('#w-list-title', this.value)">
+                        </div>
+                        <div class="field">
+                            <label>Bullet Points (Enter for new line)</label>
+                            <textarea oninput="updateList(this.value)">Made origami for you
+Sent memes daily
+Watched all your shows
+Ate too much sushi</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div class="group-head" onclick="toggleGroup(this)">Left Sidebar <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-body">
+                        <div class="field">
+                            <label>Date / Title</label>
+                            <input type="text" value="13TH OCT" oninput="updateText('#w-left-date', this.value)">
+                        </div>
+                        <div class="field">
+                            <label>Story Text</label>
+                            <textarea oninput="updateText('#w-left-text', this.value)">Ever since I stepped into your life, you always stood out. Considering you are the prettiest girl ever (respectfully). I realized I lucked out.</textarea>
+                        </div>
+                         <div class="field">
+                            <label>Sub Date / Title</label>
+                            <input type="text" value="FIRST DATE" oninput="updateText('#w-left-sub-date', this.value)">
+                        </div>
+                        <div class="field">
+                            <label>Sub Text</label>
+                            <textarea oninput="updateText('#w-left-sub-text', this.value)">I remember being so nervous, but your smile made everything easy.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div class="group-head" onclick="toggleGroup(this)">Right Sidebar <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-body">
+                        <div class="field">
+                            <label>Title</label>
+                            <input type="text" value="ALL FESTIVALS" oninput="updateText('#w-right-title', this.value)">
+                        </div>
+                        <div class="field">
+                            <label>Text</label>
+                            <textarea oninput="updateText('#w-right-text', this.value)">It's crazy to think we celebrated all festivals together... Diwali, Ganesh Chaturthi, New Year. They mean so much more now.</textarea>
+                        </div>
+                        <div class="field">
+                            <label>Small Photo</label>
+                            <input type="file" accept="image/*" onchange="updateImage(this, '#w-img-side')">
+                        </div>
+                         <div class="field">
+                            <label>Song Title</label>
+                            <input type="text" value="OUR SONG" oninput="updateText('#w-song-title', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div class="group-head" onclick="toggleGroup(this)">Footer Strip <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-body">
+                        <div class="field">
+                            <label>Item 1 (Title: Text)</label>
+                            <input type="text" value="STAIRCASE: No explanation needed." oninput="updateFooter(0, this.value)">
+                        </div>
+                        <div class="field">
+                            <label>Item 2 (Title: Text)</label>
+                            <input type="text" value="YOUR B-DAY: Best celebration ever!" oninput="updateFooter(1, this.value)">
+                        </div>
+                        <div class="field">
+                            <label>Item 3 (Title: Text)</label>
+                            <input type="text" value="MY B-DAY: You made it special." oninput="updateFooter(2, this.value)">
+                        </div>
+                         <div class="field">
+                            <label>Item 4 (Title: Text)</label>
+                            <input type="text" value="SLEEPOVER: Talking until 4am." oninput="updateFooter(3, this.value)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+<div id="ctrl-gallery" class="template-ctrl" style="display:none;">
+                <div class="group">
+                    <div class="group-head" onclick="toggleGroup(this)">Gallery Photos <i class="fas fa-chevron-down"></i></div>
+                    <div class="group-body">
+                        <div class="field">
+                            <label>Photo 1</label>
+                            <input type="file" accept="image/*" onchange="updateImage(this, '#g-img-1')">
+                            <select onchange="setFilter('#g-img-1', this.value)" style="margin-top:5px;">
+                                <option value="f-sepia">Sepia (Default)</option>
+                                <option value="f-bw">Black & White</option>
+                                <option value="f-color">Original Color</option>
+                            </select>
+                            <input type="text" placeholder="Caption" oninput="updateText('#g-cap-1', this.value)" style="margin-top:5px;">
+                        </div>
+
+                        <div class="field">
+                            <label>Photo 2</label>
+                            <input type="file" accept="image/*" onchange="updateImage(this, '#g-img-2')">
+                            <select onchange="setFilter('#g-img-2', this.value)" style="margin-top:5px;">
+                                <option value="f-sepia">Sepia (Default)</option>
+                                <option value="f-bw">Black & White</option>
+                                <option value="f-color">Original Color</option>
+                            </select>
+                            <input type="text" placeholder="Caption" oninput="updateText('#g-cap-2', this.value)" style="margin-top:5px;">
+                        </div>
+
+                        <div class="field">
+                            <label>Photo 3</label>
+                            <input type="file" accept="image/*" onchange="updateImage(this, '#g-img-3')">
+                            <select onchange="setFilter('#g-img-3', this.value)" style="margin-top:5px;">
+                                <option value="f-sepia">Sepia (Default)</option>
+                                <option value="f-bw">Black & White</option>
+                                <option value="f-color">Original Color</option>
+                            </select>
+                            <input type="text" placeholder="Caption" oninput="updateText('#g-cap-3', this.value)" style="margin-top:5px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="actions">
+            <button class="btn-dl" onclick="downloadPaper()">
+                <i class="fas fa-download"></i> Download Poster
+            </button>
+        </div>
+    </aside>
+
+    <main class="workspace">
+        <div class="paper" id="paper">
+            
+            <div id="sticker-container"></div>
+
+            <div id="tpl-classic" style="display:block;">
+                <div class="classic-head">
+                    <h1 class="classic-title paper-title">The Cupids Post</h1>
+                </div>
+                <div class="classic-meta">
+                    <span class="meta-l">San Francisco, CA | Vol. 1</span>
+                    <span class="meta-r">14th Feb, 2024</span>
+                </div>
+                
+                <div class="classic-hero">
+                    <span class="c-hl-1">WILL YOU BE</span>
+                    <span class="c-hl-2">My Valentine?</span>
+                </div>
+
+                <div class="classic-grid">
+                    <div class="col">
+                        <div class="photo-box" style="height:300px;">
+                            <img id="c-img-1" class="f-bw" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800">
+                        </div>
+                        <div class="caption" id="c-cap-1">Love is always worth the wait</div>
+                        
+                        <h3 class="c-left-title">LOVE STORY</h3>
+                        <p class="c-left-text">Love isn't what makes the world go 'round. It is what makes the ride worthwhile. Love is a friendship that has caught on fire. It is quiet understanding, mutual confidence, sharing, and forgiving.</p>
+                    </div>
+                    <div class="col">
+                        <h3 class="c-right-title">WHAT IS LOVE?</h3>
+                        <p class="c-right-text">I am fortunate to know you, that's why I want to say, to a rare and special person... Happy Valentine's Day! Where there is love there is life.</p>
+                        <br>
+                        <div class="photo-box" style="height:200px;">
+                            <img id="c-img-2" class="f-bw" src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=800">
+                        </div>
+                        <div class="caption" id="c-cap-2">Holding hands forever</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tpl-wrapped">
+                <div class="wrapped-head">
+                    <h1 class="wrapped-title paper-title">365 Days Wrapped</h1>
+                </div>
+                <div class="wrapped-meta">
+                    <span class="meta-l">Vol. 1 | No. 14</span>
+                    <span class="meta-r">Feb 14, 2024</span>
+                </div>
+                
+                <div class="wrapped-grid">
+                    <div class="w-col-side">
+                        <h4 id="w-left-date">13TH OCT</h4>
+                        <p id="w-left-text">Ever since I stepped into your life, you always stood out. Considering you are the prettiest girl ever (respectfully). I realized I lucked out.</p>
+                        <br>
+                        <h4 id="w-left-sub-date">FIRST DATE</h4>
+                        <p id="w-left-sub-text">I remember being so nervous, but your smile made everything easy.</p>
+                    </div>
+
+                    <div class="w-center">
+                        <div class="photo-box" style="height:350px;">
+                            <img id="w-img-main" class="f-bw" src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800">
+                        </div>
+                        
+                        <div class="w-break">
+                            <h2>BREAKING NEWS</h2>
+                            <p>Fatman & Curly hit 1 year!</p>
+                        </div>
+
+                        <div class="w-list">
+                            <h5 id="w-list-title">ALL THE THINGS WE DID:</h5>
+                            <ul id="w-list-ul">
+                                <li>Made origami for you</li>
+                                <li>Sent memes daily</li>
+                                <li>Watched all your shows</li>
+                                <li>Ate too much sushi</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="w-col-side">
+                        <h4 id="w-right-title">ALL FESTIVALS</h4>
+                        <p id="w-right-text">It's crazy to think we celebrated all festivals together... Diwali, Ganesh Chaturthi, New Year. They mean so much more now.</p>
+                        <div class="photo-box" style="height:100px; margin-top:10px;">
+                             <img id="w-img-side" src="https://images.unsplash.com/photo-1511253488737-25e2270b2128?auto=format&fit=crop&w=800" class="f-bw">
+                        </div>
+                        <br>
+                        <div style="opacity:0.6; display:flex; gap:5px; align-items:center;">
+                            <i class="fab fa-spotify" style="font-size:1.5rem;"></i> <span id="w-song-title">OUR SONG</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-footer">
+                    <div class="w-foot-item" id="foot-0"><h5>STAIRCASE</h5><p>No explanation needed.</p></div>
+                    <div class="w-foot-item" id="foot-1"><h5>YOUR B-DAY</h5><p>Best celebration ever!</p></div>
+                    <div class="w-foot-item" id="foot-2"><h5>MY B-DAY</h5><p>You made it special.</p></div>
+                    <div class="w-foot-item" id="foot-3"><h5>SLEEPOVER</h5><p>Talking until 4am.</p></div>
+                </div>
+            </div>
+
+            <div id="tpl-gallery">
+                <div class="gal-head">
+                    <h1 class="gal-title paper-title">The Gallery</h1>
+                    <span class="gal-badge meta-r">FEB 14, 2024</span>
+                </div>
+                <div class="gal-grid">
+                    <div class="polaroid">
+                        <div class="photo-box" style="height:350px;">
+                            <img id="g-img-1" class="f-sepia" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800">
+                        </div>
+                        <div class="polaroid-cap" id="g-cap-1">Pure Bliss</div>
+                    </div>
+                    <div class="polaroid">
+                        <div class="photo-box" style="height:350px;">
+                            <img id="g-img-2" class="f-sepia" src="https://images.unsplash.com/photo-1524638431109-93d95c968f03?auto=format&fit=crop&w=800">
+                        </div>
+                        <div class="polaroid-cap" id="g-cap-2">Forever & Always</div>
+                    </div>
+                     <div class="polaroid" style="grid-column: span 2; transform:rotate(1deg); margin-top:20px;">
+                        <div class="photo-box" style="height:400px;">
+                            <img id="g-img-3" class="f-sepia" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800">
+                        </div>
+                        <div class="polaroid-cap" id="g-cap-3">Our Best Adventure</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- TEMPLATE LOGIC ---
+        function setTemplate(tpl) {
+            // Update Buttons
+            document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
+            event.target.closest('.t-btn').classList.add('active');
+
+            // Hide/Show Paper Sections
+            document.getElementById('tpl-classic').style.display = 'none';
+            document.getElementById('tpl-wrapped').style.display = 'none';
+            document.getElementById('tpl-gallery').style.display = 'none';
+            document.getElementById('tpl-' + tpl).style.display = 'block';
+
+            // Hide/Show Sidebar Groups
+            document.querySelectorAll('.template-ctrl').forEach(el => el.style.display = 'none');
+            document.getElementById('ctrl-' + tpl).style.display = 'block';
+
+            // Update Name
+            const titleMap = {
+                'classic': 'The Cupids Post',
+                'wrapped': '365 Days Wrapped',
+                'gallery': 'The Gallery'
+            };
+            const name = titleMap[tpl];
+            updateText('.paper-title', name);
+            document.querySelector('.group-body input').value = name;
+        }
+
+        // --- CONTENT UPDATES ---
+        function updateText(selector, val) {
+            document.querySelectorAll(selector).forEach(el => el.innerText = val);
+        }
+
+        function updateList(val) {
+            const list = document.getElementById('w-list-ul');
+            list.innerHTML = '';
+            val.split('\n').forEach(line => {
+                if(line.trim()) {
+                    const li = document.createElement('li');
+                    li.innerText = line;
+                    list.appendChild(li);
+                }
+            });
+        }
+
+        function updateFooter(index, val) {
+            const parts = val.split(':');
+            const title = parts[0] || '';
+            const desc = parts[1] || '';
+            
+            const item = document.getElementById('foot-' + index);
+            if(item) {
+                item.querySelector('h5').innerText = title;
+                item.querySelector('p').innerText = desc;
+            }
+        }
+
+        function updateImage(input, selector) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => document.querySelector(selector).src = e.target.result;
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function setFilter(selector, filterClass) {
+            const img = document.querySelector(selector);
+            img.className = filterClass;
+        }
+
+        // --- GLOBAL STYLES ---
+        function toggleGroup(head) {
+            head.parentElement.classList.toggle('closed');
+        }
+
+        function setInk(color, dot) {
+            document.documentElement.style.setProperty('--ink', color);
+            document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+            dot.classList.add('active');
+        }
+
+        function toggleVintage(mode) {
+            const paper = document.getElementById('paper');
+            if(mode === 'vintage') paper.classList.add('vintage');
+            else paper.classList.remove('vintage');
+        }
+
+        // --- STICKERS & DRAG LOGIC ---
+        function addSticker(type) {
+            const container = document.getElementById('sticker-container');
+            const el = document.createElement('div');
+            el.className = 'draggable st-' + type;
+            
+            // Random initial position
+            el.style.left = Math.random() * 400 + 'px';
+            el.style.top = Math.random() * 400 + 'px';
+            
+            if(type === 'stamp') el.innerHTML = '<span>♥</span>APPROVED';
+            
+            // Drag Logic
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            el.addEventListener('mousedown', e => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialLeft = el.offsetLeft;
+                initialTop = el.offsetTop;
+                el.style.cursor = 'grabbing';
+            });
+
+            window.addEventListener('mousemove', e => {
+                if(!isDragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                el.style.left = (initialLeft + dx) + 'px';
+                el.style.top = (initialTop + dy) + 'px';
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                el.style.cursor = 'grab';
+            });
+
+            // Double click to remove
+            el.addEventListener('dblclick', () => el.remove());
+
+            container.appendChild(el);
+        }
+
+        function clearStickers() {
+            document.getElementById('sticker-container').innerHTML = '';
+        }
+
+        // --- DOWNLOAD ---
+        function downloadPaper() {
+            const paper = document.getElementById('paper');
+            const btn = document.querySelector('.btn-dl');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = 'Rendering...';
+
+            html2canvas(paper, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: null
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'My-Newspaper.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                btn.innerHTML = oldText;
+            });
+        }
+    </script>
+</body>
+</html>
