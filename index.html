@@ -321,13 +321,15 @@
         }
         
         .photo-box img {
-            width: 100%; height: 100%; 
+            width: 100%; height: auto;
+            min-height: 100%; 
             object-fit: cover; 
             display: block;
             pointer-events: none;
             transform-origin: center center;
             will-change: transform; /* Performance optimization */
         }
+
 
         .caption { font-family: 'Merriweather', serif; font-size: 0.75rem; font-style: italic; margin-top: 5px; text-align: center; color: #555; }
 
@@ -927,7 +929,7 @@ Watched all your shows</textarea></div>
         /* ========================
            DOWNLOAD (WIDENING FIX APPLIED HERE)
            ======================== */
-        function downloadPaper() {
+function downloadPaper() {
     if(selectedSticker) selectedSticker.classList.remove('selected');
     if(activePhotoBox) activePhotoBox.classList.remove('img-selected');
 
@@ -937,30 +939,30 @@ Watched all your shows</textarea></div>
     const oldText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rendering...';
 
-    /* ------------------------------------------------
-       STEP 1: create clean clone (NO scale, NO shadow)
-       ------------------------------------------------ */
+    /* -------------------------------
+       CLEAN CLONE (no scale / shadow)
+       ------------------------------- */
     const clone = paper.cloneNode(true);
 
-    clone.style.transform = 'none';      // remove mobile scale
+    clone.style.transform = 'none';
     clone.style.marginBottom = '0';
-    clone.style.boxShadow = 'none';     // remove shadow
+    clone.style.boxShadow = 'none';
     clone.style.position = 'fixed';
     clone.style.left = '-99999px';
     clone.style.top = '0';
 
     document.body.appendChild(clone);
 
-    /* ------------------------------------------------
-       STEP 2: render clone instead of original
-       ------------------------------------------------ */
+    /* -------------------------------
+       SIMPLE EXPORT (NO onclone hacks)
+       ------------------------------- */
     html2canvas(clone, {
         scale: window.devicePixelRatio > 1 ? 3 : 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff'
-    }).then(canvas => {
-
+    })
+    .then(canvas => {
         const link = document.createElement('a');
         link.download = 'My-Chronicle.png';
         link.href = canvas.toDataURL('image/png');
@@ -968,13 +970,14 @@ Watched all your shows</textarea></div>
 
         document.body.removeChild(clone);
         btn.innerHTML = oldText;
-
-    }).catch(e => {
+    })
+    .catch(e => {
         alert("Error: " + e.message);
         document.body.removeChild(clone);
         btn.innerHTML = oldText;
     });
 }
+
 
         /* ========================
    MOBILE AUTO-SCALING (FIXED)
