@@ -250,16 +250,22 @@
         }
 
         .paper {
-            width: 800px;
-            min-height: 1150px;
-            background: var(--paper-bg);
-            color: var(--ink);
-            padding: 40px;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            transition: transform 0.3s;
-            overflow: hidden;
-        }
+    width: 800px;
+    /* CRITICAL FIX: FORCE WIDTH TO PREVENT TEXT SQUISHING */
+    min-width: 800px; 
+    max-width: 800px;
+    flex-shrink: 0; 
+    
+    min-height: 1150px;
+    background: var(--paper-bg);
+    color: var(--ink);
+    padding: 40px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+    transform-origin: top center; 
+    overflow: hidden;
+}
 
         /* Vintage Texture */
         .paper.vintage {
@@ -965,6 +971,37 @@ Watched all your shows</textarea></div>
                 btn.innerHTML = oldText;
             });
         }
+        /* ========================
+   MOBILE AUTO-SCALING (FIXED)
+   ======================== */
+function adjustPaperScale() {
+    const paper = document.getElementById('paper');
+    const workspace = document.querySelector('.workspace');
+    
+    // Get actual width of the container
+    const availableWidth = workspace.offsetWidth;
+    const paperWidth = 800; // Fixed paper width
+    const margin = 20;
+
+    const isMobile = window.innerWidth <= 1100;
+
+    if (isMobile) { 
+        const scale = (availableWidth - margin) / paperWidth; 
+        
+        paper.style.transform = `scale(${scale})`;
+        paper.style.transformOrigin = 'top center'; 
+        
+        // Adjust margin bottom so you can see the whole paper
+        const h = 1150; 
+        paper.style.marginBottom = `-${h * (1 - scale)}px`;
+    } else {
+        paper.style.transform = 'none';
+        paper.style.marginBottom = '0';
+    }
+}
+
+window.addEventListener('resize', adjustPaperScale);
+window.addEventListener('load', adjustPaperScale);
     </script>
 </body>
 </html>
